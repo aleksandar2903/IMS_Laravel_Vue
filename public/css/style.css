@@ -1,0 +1,37 @@
+@media screen and (max-width: 500px) {
+    li.paginate_button.previous {
+        display: inline;
+        margin-left: auto;
+    }
+
+    li.paginate_button.next {
+        display: inline;
+        margin-right: auto;
+    }
+    li.paginate_button.active {
+        display: inline;
+    }
+
+    li.paginate_button {
+        display: none;
+    }
+}
+li.paginate_button.next > a{
+    border: 0;
+    margin-left: 20px;
+}
+
+li.paginate_button.previous > a {
+    border: 0;
+    margin-right: 30px;
+}
+swal {
+    height: 20%;
+}
+.sec {
+    position: relative;
+    top: -10px;
+}
+.text-responsive {
+    font-size: calc(100% + 1vw + 1vh);
+}
