@@ -12,8 +12,12 @@ class ProductCategory extends Model
     use HasFactory, Notifiable;
     use SoftDeletes;
     protected $table = 'product_categories';
-    protected $fillable = ['name'];
-    public function products() {
-        return $this->hasMany('App\Models\Product');
+    protected $fillable = ['name', 'image'];
+    public function subcategories() {
+        return $this->hasMany('App\Models\ProductSubcategory', 'product_category_id');
+    }
+
+    public function subProducts() {
+        return $this->hasManyThrough('App\Models\Product','App\Models\ProductSubcategory','product_category_id');
     }
 }

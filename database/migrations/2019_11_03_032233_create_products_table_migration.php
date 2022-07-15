@@ -17,14 +17,17 @@ class CreateProductsTableMigration extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->text('description')->nullable();
-            $table->string('image')->nullable();
-            $table->unsignedBigInteger('product_category_id');
+            $table->string('image_id')->nullable();
+            $table->unsignedBigInteger('product_subcategory_id');
+            $table->unsignedBigInteger('product_brand_id')->nullable();
             $table->unsignedDecimal('price', 10, 2);
             $table->unsignedinteger('stock')->default(0);
             $table->unsignedinteger('stock_defective')->default(0);
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('product_category_id')->references('id')->on('product_categories');
+            $table->foreign('product_subcategory_id')->references('id')->on('product_subcategories');
+            $table->foreign('product_brand_id')->references('id')->on('brands');
+            $table->foreign('image_id')->references('id')->on('images')->onDelete('nullable');
         });
     }
 

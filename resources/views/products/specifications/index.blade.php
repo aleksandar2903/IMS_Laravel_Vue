@@ -9,12 +9,12 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form enctype="multipart/form-data" method="post" action="" autocomplete="off">
+                    <form method="post" action="" autocomplete="off">
                         @method('patch')
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
-                                <p class="mb-0 h2">{{__('Edit Category')}}</p>
+                                <p class="mb-0 h2">{{__('Edit Specification')}}</p>
                             </div>
                             <div class="col-4 text-right">
                                 <button type="button" class="close" aria-label="Close">
@@ -29,14 +29,6 @@
                                     class="form-control align-center {{ $errors->has('name') ? ' is-invalid' : '' }}"
                                     placeholder="{{__('Name')}}" value="{{ old('name') }}" required autofocus />
                                 @include('alerts.feedback',['field'=>'name'])
-                            </div>
-
-                            <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
-                                <label class="form-control-label" for="image">{{ __('Add Image')}}</label>
-                                <input type="file" name="image" id="image"
-                                    class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}"
-                                    accept="image/png, image/jpeg, image/jpg">
-                                @include('alerts.feedback', ['field' => 'images'])
                             </div>
 
                             <div class="text-center">
@@ -53,12 +45,11 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="{{route('categories.store')}}"
-                        autocomplete="off">
+                    <form method="post" action="{{route('specifications.store')}}" autocomplete="off">
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
-                                <p class="mb-0 h2">{{__('Create Category')}}</p>
+                                <p class="mb-0 h2">{{__('Create Specification')}}</p>
                             </div>
                             <div class="col-4 text-right">
                                 <button type="button" class="close" aria-label="Close">
@@ -74,13 +65,6 @@
                                     placeholder="{{__('Name')}}" value="{{ old('name') }}" required autofocus />
                                 @include('alerts.feedback',['field'=>'name'])
                             </div>
-                            <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
-                                <label class="form-control-label" for="image">{{ __('Add Image')}}</label>
-                                <input type="file" name="image" id="image"
-                                    class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}"
-                                    accept="image/png, image/jpeg, image/jpg">
-                                @include('alerts.feedback', ['field' => 'images'])
-                            </div>
 
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary">{{ __('Submit')}}</button>
@@ -95,8 +79,9 @@
         <div class="card-header">
             <div class="row align-items-center">
                 <div class="col-6">
-                    <h2 class="card-title m-0 p-0 font-weight-600">{{__('Category List')}}</h2>
-                    <span class="m-0 p-0 h5 font-weight-300">{{ __('Categories')}} | {{__('Category List')}}</span>
+                    <h2 class="card-title m-0 p-0 font-weight-600">{{__('Specification List')}}</h2>
+                    <span class="m-0 p-0 h5 font-weight-300">{{ __('Specifications')}} | {{__('Specification
+                        List')}}</span>
                 </div>
                 <div class="col-6 text-right">
                     <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#my-modal"><i
@@ -117,12 +102,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($categories as $key => $category)
+                    @foreach ($specifications as $key => $specification)
                     <tr>
                         <td>{{ ++$key }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>{{ $category->subProducts->count() }}</td>
-                        <td>{{ $category->updated_at }}</td>
+                        <td>{{ $specification->name }}</td>
+                        <td>{{ $specification->products->count() }}</td>
+                        <td>{{ $specification->updated_at }}</td>
                         <td>
                             <div class="btn-group dropleft">
                                 <a class="btn-link text-dark" type="button" id="triggerId" data-toggle="dropdown"
@@ -131,22 +116,22 @@
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="triggerId">
                                     <a class="dropdown-item text-darker border-0" aria-pressed="true"
-                                        href="{{ route('categories.show', $category, app()->getLocale()) }}">
+                                        href="{{ route('specifications.show', $specification, app()->getLocale()) }}">
                                         {{ __('Show')}}
                                     </a>
                                     {{-- <a class="dropdown-item text-darker border-0" aria-pressed="true"
-                                        href="{{ route('categories.edit', $category) }}">
+                                        href="{{ route('specifications.edit', $specification) }}">
                                         {{ __('Edit')}}
                                     </a> --}}
                                     <button class="dropdown-item text-darker" type="button" data-toggle="modal"
                                         data-target="#editModal"
-                                        data-action="{{ route('categories.update',$category) }}"
-                                        data-name="{!!$category->name!!}">
+                                        data-action="{{ route('specifications.update',$specification) }}"
+                                        data-name="{!!$specification->name!!}">
                                         {{ __('Edit')}}
                                     </button>
                                     <button class="dropdown-item text-danger" type="button" data-toggle="modal"
                                         data-target="#deleteConfirmationModal"
-                                        data-action="{{ route('categories.destroy', $category) }}">
+                                        data-action="{{ route('specifications.destroy', $specification) }}">
                                         {{ __('Delete')}}
                                     </button>
                                 </div>
@@ -172,5 +157,16 @@ $('#editModal').on('show.bs.modal', function (event) {
                 modal.find('#input-name').val(name)
     });
 });
+$(document).ready(function(){
+        new SlimSelect({
+        select: '.form-select'
+    });
+    })
+
+    $(document).ready(function(){
+        new SlimSelect({
+        select: '.form-select-create'
+    });
+    })
 </script>
 @endpush

@@ -14,7 +14,7 @@
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
-                                <p class="mb-0 h2">{{__('Edit Category')}}</p>
+                                <p class="mb-0 h2">{{__('Edit Brand')}}</p>
                             </div>
                             <div class="col-4 text-right">
                                 <button type="button" class="close" aria-label="Close">
@@ -53,12 +53,12 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="{{route('categories.store')}}"
+                    <form method="post" enctype="multipart/form-data" action="{{route('brands.store')}}"
                         autocomplete="off">
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
-                                <p class="mb-0 h2">{{__('Create Category')}}</p>
+                                <p class="mb-0 h2">{{__('Create Brand')}}</p>
                             </div>
                             <div class="col-4 text-right">
                                 <button type="button" class="close" aria-label="Close">
@@ -95,8 +95,8 @@
         <div class="card-header">
             <div class="row align-items-center">
                 <div class="col-6">
-                    <h2 class="card-title m-0 p-0 font-weight-600">{{__('Category List')}}</h2>
-                    <span class="m-0 p-0 h5 font-weight-300">{{ __('Categories')}} | {{__('Category List')}}</span>
+                    <h2 class="card-title m-0 p-0 font-weight-600">{{__('Brand List')}}</h2>
+                    <span class="m-0 p-0 h5 font-weight-300">{{ __('Brands')}} | {{__('Brand List')}}</span>
                 </div>
                 <div class="col-6 text-right">
                     <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#my-modal"><i
@@ -117,12 +117,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($categories as $key => $category)
+                    @foreach ($brands as $key => $brand)
                     <tr>
                         <td>{{ ++$key }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>{{ $category->subProducts->count() }}</td>
-                        <td>{{ $category->updated_at }}</td>
+                        <td>{{ $brand->name }}</td>
+                        <td>{{ $brand->products->count() }}</td>
+                        <td>{{ $brand->updated_at }}</td>
                         <td>
                             <div class="btn-group dropleft">
                                 <a class="btn-link text-dark" type="button" id="triggerId" data-toggle="dropdown"
@@ -131,22 +131,21 @@
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="triggerId">
                                     <a class="dropdown-item text-darker border-0" aria-pressed="true"
-                                        href="{{ route('categories.show', $category, app()->getLocale()) }}">
+                                        href="{{ route('brands.show', $brand, app()->getLocale()) }}">
                                         {{ __('Show')}}
                                     </a>
                                     {{-- <a class="dropdown-item text-darker border-0" aria-pressed="true"
-                                        href="{{ route('categories.edit', $category) }}">
+                                        href="{{ route('brands.edit', $brand) }}">
                                         {{ __('Edit')}}
                                     </a> --}}
                                     <button class="dropdown-item text-darker" type="button" data-toggle="modal"
-                                        data-target="#editModal"
-                                        data-action="{{ route('categories.update',$category) }}"
-                                        data-name="{!!$category->name!!}">
+                                        data-target="#editModal" data-action="{{ route('brands.update',$brand) }}"
+                                        data-name="{!!$brand->name!!}">
                                         {{ __('Edit')}}
                                     </button>
                                     <button class="dropdown-item text-danger" type="button" data-toggle="modal"
                                         data-target="#deleteConfirmationModal"
-                                        data-action="{{ route('categories.destroy', $category) }}">
+                                        data-action="{{ route('brands.destroy', $brand) }}">
                                         {{ __('Delete')}}
                                     </button>
                                 </div>

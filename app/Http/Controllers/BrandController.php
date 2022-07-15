@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Product;
-use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\MessageBag;
-use Illuminate\Validation\Rule;
 
-class ProductCategoryController extends Controller
+class BrandController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(ProductCategory $model)
+    public function index(Brand $model)
     {
-        $categories = ProductCategory::latest('updated_at')->get();
+        $brands = Brand::latest('updated_at')->get();
 
-        return view('products.categories.index', compact('categories'));
+        return view('products.brands.index', compact('brands'));
     }
 
     /**
@@ -40,9 +37,9 @@ class ProductCategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, ProductCategory $category)
+    public function store(Request $request, Brand $brand)
     {
-        $request->validate(['name'=>'required|min:3|unique:product_categories,name',
+        $request->validate(['name'=>'required|min:2|unique:brands,name',
         'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
 
         $data = $request->all();
@@ -52,9 +49,9 @@ class ProductCategoryController extends Controller
         $request->image->move(public_path('/storage/images/'),$imageName);
         $data['image'] = $imageName;
 
-        $category->create($data);
-        return redirect('/products/categories')
-            ->withStatus(__('Category successfully created.'));
+        $brand->create($data);
+        return redirect('/products/brands')
+            ->withStatus(__('Brand successfully created.'));
     }
 
     /**
@@ -63,13 +60,11 @@ class ProductCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(ProductCategory $category)
+    public function show(Brand $brand)
     {
-        return view('products.categories.show', [
-            'category' => $category,
-            'products' => Product::where(function($query) use ($category){
-                $query->where('product_category_id', $category->id);
-            })->latest()->get()
+        return view('products.brands.show', [
+            'brand' => $brand,
+            'products' => Product::where('product_brand_id', $brand->id)->latest()->get()
         ]);
     }
 
@@ -79,9 +74,9 @@ class ProductCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(ProductCategory $category)
+    public function edit(Brand $brand)
     {
-        return view('products.categories.edit', compact('category'));
+        return view('products.brands.edit', compact('brand'));
     }
 
     /**
@@ -91,9 +86,9 @@ class ProductCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ProductCategory $category)
+    public function update(Request $request, Brand $brand)
     {
-        $request->validate(['name'=>'required|min:3|unique:product_categories,name',
+        $request->validate(['name'=>'required|min:2|unique:brands,name',
         'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
 
         $data = $request->all();
@@ -105,10 +100,10 @@ class ProductCategoryController extends Controller
             $data['image'] = $imageName;
         }
 
-        $category->update($data);
+        $brand->update($data);
 
-        return redirect('/products/categories')
-            ->withStatus(__('Category successfully updated.'));
+        return redirect('/products/brands')
+            ->withStatus(__('Brand successfully updated.'));
     }
 
     /**
@@ -117,14 +112,14 @@ class ProductCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProductCategory $category)
+    public function destroy(Brand $brand)
     {
-        if ($category->image) {
-            File::delete(public_path('/storage/images/' . $category->image));
+        if ($brand->image) {
+            File::delete(public_path('/storage/images/' . $brand->image));
         }
-        $category->delete();
+        $brand->delete();
 
-        return redirect('/products/categories')
-            ->withStatus(__('Category successfully deleted.'));
+        return redirect('/products/brands')
+            ->withStatus(__('Brand successfully deleted.'));
     }
 }

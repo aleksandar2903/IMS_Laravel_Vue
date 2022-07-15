@@ -26,19 +26,36 @@
                                 placeholder="{{ __('Name')}}" value="{{ old('name') }}" required autofocus>
                             @include('alerts.feedback', ['field' => 'name'])
                         </div>
-                        <div class="form-group{{ $errors->has('product_category_id') ? ' has-danger' : '' }}">
-                            <label class="form-control-label" for="input-name">{{ __('Category')}}</label>
-                            <select name="product_category_id" id="input-category"
+                        <div class="form-group{{ $errors->has('product_subcategory_id') ? ' has-danger' : '' }}">
+                            <label class="form-control-label" for="input-subcategory">{{ __('Subategory')}}</label>
+                            <select name="product_subcategory_id" id="input-subcategory"
                                 class="form-select {{ $errors->has('name') ? ' is-invalid' : '' }}" required>
                                 @foreach ($categories as $category)
-                                @if($category['id'] == old('product_category_id'))
-                                <option value="{{$category['id']}}" selected>{{$category['name']}}</option>
+                                @if($category['id'] == old('product_subcategory_id'))
+                                <option value="{{$category['id']}}" selected>
+                                    {{$category->category->name}} &#8594; {{$category['name']}}</option>
                                 @else
-                                <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                <option value="{{$category['id']}}">{{$category->category->name}} &#8594;
+                                    {{$category['name']}}</option>
                                 @endif
                                 @endforeach
                             </select>
-                            @include('alerts.feedback', ['field' => 'product_category_id'])
+                            @include('alerts.feedback', ['field' => 'product_subcategory_id'])
+                        </div>
+
+                        <div class="form-group{{ $errors->has('product_brand_id') ? ' has-danger' : '' }}">
+                            <label class="form-control-label" for="input-brand">{{ __('Brand')}}</label>
+                            <select name="product_brand_id" id="input-brand"
+                                class="form-select-brands {{ $errors->has('name') ? ' is-invalid' : '' }}">
+                                @foreach ($brands as $brand)
+                                @if($brand['id'] == old('product_brand_id'))
+                                <option value="{{$brand['id']}}" selected>{{$brand['name']}}</option>
+                                @else
+                                <option value="{{$brand['id']}}">{{$brand['name']}}</option>
+                                @endif
+                                @endforeach
+                            </select>
+                            @include('alerts.feedback', ['field' => 'product_brand_id'])
                         </div>
 
                         <div class="form-group{{ $errors->has('description') ? ' has-danger' : '' }}">
@@ -60,8 +77,8 @@
                             </div>
                             <div class="col-12 col-lg-4 col-md-4 col-sm-4 col-xl-4">
                                 <div class="form-group{{ $errors->has('stock_defective') ? ' has-danger' : '' }}">
-                                    <label class="form-control-label"
-                                        for="input-stock_defective">{{ __('Defective Stock')}}</label>
+                                    <label class="form-control-label" for="input-stock_defective">{{ __('Defective
+                                        Stock')}}</label>
                                     <input type="number" name="stock_defective" id="input-stock_defective"
                                         class="form-control {{ $errors->has('stock_defective') ? ' is-invalid' : '' }}"
                                         placeholder="{{ __('Defective Stock')}}" value="{{ old('stock_defective') }}"
@@ -78,14 +95,14 @@
                                     @include('alerts.feedback', ['field' => 'price'])
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4 col-md-4 col-sm-4 col-xl-4">
+                            {{-- <div class="col-12 col-lg-4 col-md-4 col-sm-4 col-xl-4">
                                 <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
                                     <label class="form-control-label" for="image">{{ __('Image')}}</label>
                                     <input type="file" name="image" id="image"
                                         class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}">
                                     @include('alerts.feedback', ['field' => 'image'])
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="text-center">
@@ -102,8 +119,11 @@
 <script>
     $(document).ready(function(){
         new SlimSelect({
-        select: '.form-select'
+        select: '#input-subcategory',
     });
-    })
+    new SlimSelect({
+        select: '#input-brand',
+    });
+    });
 </script>
 @endpush

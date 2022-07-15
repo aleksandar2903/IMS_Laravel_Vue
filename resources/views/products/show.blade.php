@@ -8,7 +8,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-12 col-lg-6 col-xl-6 col-md-6 col-sm-12">
+                    <div class="col-12 col-lg-6">
                         <table class="table border-0">
                             <tbody class="border-0">
                                 <tr>
@@ -17,7 +17,11 @@
                                 </tr>
                                 <tr>
                                     <td class="font-weight-600">{{ __('Category')}}: </td>
-                                    <td>{{$product->category->name}} </td>
+                                    <td>{{$product->category->category->name}} &#8594; {{$product->category->name}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-600">{{ __('Brand')}}: </td>
+                                    <td>{{$product->brand ? $product->brand->name : 'NULL'}}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-600">{{__('Product description')}}: </td>
@@ -42,18 +46,51 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-12 col-lg-6 col-xl-6 col-md-6 col-sm-12 d-flex">
-                        @if($product->image)
-                        <img class="mx-auto my-auto w-75" src="{{asset('storage/images/'.$product->image)}}" alt="">
-                        @else
-                        <img class="mx-auto my-auto w-75" src="{{asset('storage/images/noimageavailable.png')}}"
-                            alt="No image available">
-                        @endif
+                    <div class="col-12 col-lg-6  d-flex">
+                        <div class="row">
+                            <div class="col-12">
+                                @if($product->image)
+                                <img class="mx-auto my-auto w-75" id="selectedImage"
+                                    src="{{asset('storage/images/'.$product->image->original)}}" alt="">
+                                @else
+                                <img class="mx-auto my-auto w-75" src="{{asset('storage/images/noimageavailable.png')}}"
+                                    alt="No image available">
+                                @endif
+                            </div>
+                            <div class="col-12">
+                                @foreach ($product->images as $image)
+                                <img onclick="imageClick(this.src)" src="{{asset('storage/images/'.$image->w500)}}"
+                                    alt="{{$image->w500}}" class="img-thumbnail m-1" style="height: 100px">
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">{{ __('Product Specifications')}}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-lg-6">
+                        <table class="table border-0">
+                            <tbody class="border-0">
+                                @foreach ($product->attributes as $key => $value)
+                                <tr>
+                                    <td class="font-weight-600 border-top-0">{{__($value->attribute->name)}}: </td>
+                                    <td class="border-top-0 text-wrap text-break">{{$value->value}} </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 @php(
 $text = array('Traffic'=>__('Traffic'), 'Overview'=>__('Overview'),
@@ -124,8 +161,8 @@ $text = array('Traffic'=>__('Traffic'), 'Overview'=>__('Overview'),
                             @foreach ($receiveds as $received)
                             <tr>
                                 <td>{{ date('d-m-y', strtotime($received->created_at)) }}</td>
-                                <td><a
-                                        href="{{ route('purchases.show', $received->receipt) }}">{{ $received->receipt_id }}</a>
+                                <td><a href="{{ route('purchases.show', $received->receipt) }}">{{ $received->receipt_id
+                                        }}</a>
                                 </td>
                                 <td style="max-width:150px;">{{ $received->receipt->title }}</td>
                                 <td>{{ $received->stock }}</td>
@@ -152,6 +189,9 @@ $text = array('Traffic'=>__('Traffic'), 'Overview'=>__('Overview'),
 <script>
     $(document).ready( function () {
     $('#datatable').DataTable();
-});
+    } );
+
+    function imageClick(e) { document.getElementById("selectedImage").src = e.replace("w500", "original");; }
+
 </script>
 @endpush

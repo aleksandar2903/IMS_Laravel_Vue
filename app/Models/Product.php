@@ -13,12 +13,22 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name', 'description', 'product_category_id', 'price', 'stock', 'stock_defective','image'
+        'name', 'description', 'price', 'stock', 'stock_defective', 'image_id', 'product_brand_id', 'product_subcategory_id'
     ];
 
     public function category()
     {
-        return $this->belongsTo('App\Models\ProductCategory', 'product_category_id')->withTrashed();
+        return $this->belongsTo('App\Models\ProductSubcategory', 'product_subcategory_id');
+    }
+
+    public function subcategory_with_category()
+    {
+        return $this->belongsTo('App\Models\ProductSubcategory', 'product_subcategory_id')->with('category');
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo('App\Models\Brand', 'product_brand_id')->withTrashed();
     }
 
     public function solds()
@@ -26,8 +36,28 @@ class Product extends Model
         return $this->hasMany('App\Models\SoldProduct');
     }
 
+    public function attributes()
+    {
+        return $this->hasMany(ProductSpecificationAttributeValue::class, 'product_id');
+    }
+
+    public function specification_attributes()
+    {
+        return $this->hasMany(ProductSpecificationAttributeValue::class, 'product_id')->with('attribute');
+    }
+
     public function receiveds()
     {
         return $this->hasMany('App\Models\ReceivedProduct');
+    }
+
+    public function images()
+    {
+        return $this->hasMany('App\Models\ProductImage');
+    }
+
+    public function image()
+    {
+        return $this->belongsTo('App\Models\ProductImage');
     }
 }

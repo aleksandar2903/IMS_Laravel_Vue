@@ -9,12 +9,12 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form enctype="multipart/form-data" method="post" action="" autocomplete="off">
+                    <form method="post" action="" autocomplete="off">
                         @method('patch')
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
-                                <p class="mb-0 h2">{{__('Edit Category')}}</p>
+                                <p class="mb-0 h2">{{__('Edit Subcategory')}}</p>
                             </div>
                             <div class="col-4 text-right">
                                 <button type="button" class="close" aria-label="Close">
@@ -31,12 +31,15 @@
                                 @include('alerts.feedback',['field'=>'name'])
                             </div>
 
-                            <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
-                                <label class="form-control-label" for="image">{{ __('Add Image')}}</label>
-                                <input type="file" name="image" id="image"
-                                    class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}"
-                                    accept="image/png, image/jpeg, image/jpg">
-                                @include('alerts.feedback', ['field' => 'images'])
+                            <div class="form-group{{ $errors->has('product_category_id') ? ' has-danger' : '' }}">
+                                <label class="form-control-label" for="input-name">{{ __('Subcategory')}}</label>
+                                <select name="product_category_id" id="input-category"
+                                    class="form-select {{ $errors->has('name') ? ' is-invalid' : '' }}" required>
+                                    @foreach ($categories as $category)
+                                    <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                    @endforeach
+                                </select>
+                                @include('alerts.feedback', ['field' => 'product_category_id'])
                             </div>
 
                             <div class="text-center">
@@ -53,12 +56,11 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="{{route('categories.store')}}"
-                        autocomplete="off">
+                    <form method="post" action="{{route('subcategories.store')}}" autocomplete="off">
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
-                                <p class="mb-0 h2">{{__('Create Category')}}</p>
+                                <p class="mb-0 h2">{{__('Create Subcategory')}}</p>
                             </div>
                             <div class="col-4 text-right">
                                 <button type="button" class="close" aria-label="Close">
@@ -74,12 +76,20 @@
                                     placeholder="{{__('Name')}}" value="{{ old('name') }}" required autofocus />
                                 @include('alerts.feedback',['field'=>'name'])
                             </div>
-                            <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
-                                <label class="form-control-label" for="image">{{ __('Add Image')}}</label>
-                                <input type="file" name="image" id="image"
-                                    class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}"
-                                    accept="image/png, image/jpeg, image/jpg">
-                                @include('alerts.feedback', ['field' => 'images'])
+
+                            <div class="form-group{{ $errors->has('product_category_id') ? ' has-danger' : '' }}">
+                                <label class="form-control-label" for="input-name">{{ __('Subcategory')}}</label>
+                                <select name="product_category_id" id="input-category"
+                                    class="form-select-create {{ $errors->has('name') ? ' is-invalid' : '' }}" required>
+                                    @foreach ($categories as $category)
+                                    @if($category['id'] == old('product_category_id'))
+                                    <option value="{{$category['id']}}" selected>{{$category['name']}}</option>
+                                    @else
+                                    <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                    @endif
+                                    @endforeach
+                                </select>
+                                @include('alerts.feedback', ['field' => 'product_category_id'])
                             </div>
 
                             <div class="text-center">
@@ -95,8 +105,8 @@
         <div class="card-header">
             <div class="row align-items-center">
                 <div class="col-6">
-                    <h2 class="card-title m-0 p-0 font-weight-600">{{__('Category List')}}</h2>
-                    <span class="m-0 p-0 h5 font-weight-300">{{ __('Categories')}} | {{__('Category List')}}</span>
+                    <h2 class="card-title m-0 p-0 font-weight-600">{{__('Subcategory List')}}</h2>
+                    <span class="m-0 p-0 h5 font-weight-300">{{ __('Subcategories')}} | {{__('Subcategory List')}}</span>
                 </div>
                 <div class="col-6 text-right">
                     <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#my-modal"><i
@@ -117,11 +127,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($categories as $key => $category)
+                    @foreach ($subcategories as $key => $category)
                     <tr>
                         <td>{{ ++$key }}</td>
                         <td>{{ $category->name }}</td>
-                        <td>{{ $category->subProducts->count() }}</td>
+                        <td>{{ $category->products->count() }}</td>
                         <td>{{ $category->updated_at }}</td>
                         <td>
                             <div class="btn-group dropleft">
@@ -131,22 +141,24 @@
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="triggerId">
                                     <a class="dropdown-item text-darker border-0" aria-pressed="true"
-                                        href="{{ route('categories.show', $category, app()->getLocale()) }}">
+                                        href="{{ route('subcategories.show', $category, app()->getLocale()) }}">
                                         {{ __('Show')}}
                                     </a>
-                                    {{-- <a class="dropdown-item text-darker border-0" aria-pressed="true"
-                                        href="{{ route('categories.edit', $category) }}">
-                                        {{ __('Edit')}}
+                                    {{-- <a
+                                    class="dropdown-item text-darker border-0" aria-pressed="true"
+                                    href="{{ route('categories.edit', $category) }}"
+                                    >
+                                    {{ __('Edit')}}
                                     </a> --}}
                                     <button class="dropdown-item text-darker" type="button" data-toggle="modal"
                                         data-target="#editModal"
-                                        data-action="{{ route('categories.update',$category) }}"
+                                        data-action="{{ route('subcategories.update',$category) }}"
                                         data-name="{!!$category->name!!}">
                                         {{ __('Edit')}}
                                     </button>
                                     <button class="dropdown-item text-danger" type="button" data-toggle="modal"
                                         data-target="#deleteConfirmationModal"
-                                        data-action="{{ route('categories.destroy', $category) }}">
+                                        data-action="{{ route('subcategories.destroy', $category) }}">
                                         {{ __('Delete')}}
                                     </button>
                                 </div>
@@ -172,5 +184,16 @@ $('#editModal').on('show.bs.modal', function (event) {
                 modal.find('#input-name').val(name)
     });
 });
+$(document).ready(function(){
+        new SlimSelect({
+        select: '.form-select'
+    });
+    })
+
+    $(document).ready(function(){
+        new SlimSelect({
+        select: '.form-select-create'
+    });
+    })
 </script>
 @endpush

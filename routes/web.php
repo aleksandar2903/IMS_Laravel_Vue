@@ -1,5 +1,9 @@
 <?php
+
+use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\TransactionController;
+use App\Models\ProductImage;
+use App\Models\ProductSpecificationAttribute;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -24,13 +28,24 @@ Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->nam
 Route::resources([
             'providers' => '\App\Http\Controllers\ProviderController',
             'products/categories' => '\App\Http\Controllers\ProductCategoryController',
+            'products/subcategories' => '\App\Http\Controllers\ProductSubcategoryController',
+            'products/specifications' => '\App\Http\Controllers\ProductSpecificationAttributeController',
+            'products/brands' => '\App\Http\Controllers\BrandController',
             'products' => '\App\Http\Controllers\ProductController',
             'clients' => '\App\Http\Controllers\ClientController',
             'methods' => '\App\Http\Controllers\MethodController',
         ]);
+Route::patch('products/{product}/selectimage', ['as' => 'products.product.selectImage', 'uses' => '\App\Http\Controllers\ProductController@selectImage']);
+
+Route::post('products/{product}/addSpecificationAttribute', ['as' => 'products.product.addSpecificationAttribute', 'uses' => '\App\Http\Controllers\ProductController@addSpecificationAttribute']);
+
+Route::delete('products/{attribute}/removeSpecificationAttribute', ['as' => 'products.product.removeSpecificationAttribute', 'uses' => '\App\Http\Controllers\ProductController@removeSpecificationAttribute']);
+
  Route::get('clients/{client}/transactions/add', ['as' => 'clients.transactions.add', 'uses' => '\App\Http\Controllers\ClientController@addtransaction']);
 
  Route::resource('transactions', TransactionController::class)->except(['create', 'show']);
+ Route::resource('images', ProductImageController::class)->except(['create, edit']);
+ Route::resource('attributes', ProductSpecificationAttribute::class)->except(['create, edit']);
  Route::get('transactions/{type}', ['as' => 'transactions.type', 'uses' => '\App\Http\Controllers\TransactionController@type']);
  Route::get('transactions/{type}/create', ['as' => 'transactions.create', 'uses' => '\App\Http\Controllers\TransactionController@create']);
 
