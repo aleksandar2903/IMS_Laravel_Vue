@@ -19,87 +19,47 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Image;
 
 class ProductController extends Controller
 {
+
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function search(Request $request)
     {
-        $arrayCategories = [];
-        if ($request->has('categories') && $request->categories != null) {
-            $arrayCategories = explode(',', $request->categories);
-        }
+        $helper = new Helper();
+        $req = $helper->requestBuilder($request);
+        $query = $helper->queryBuilder($req['query'], $req['categories'], $req['brands'], $req['priceMax'], $req['priceMin']);
 
-        $arrayBrands = [];
-        if ($request->has('brands') && $request->brands != null) {
-            $arrayBrands = explode(',', $request->brands);
-        }
+        $productQuery = $query['products'];
 
-        $query_string = "";
-        $sortBy = "name";
-        $order = "ASC";
-        $priceMin = 0.0;
-        $priceMax = 99999999.9;
+        return $productQuery->with('image')->orderBy($req['sortBy'], $req['order'])->paginate(15);
+    }
 
-        if ($request->has('sortBy') && $request->sortBy != null) {
-            switch ($request->sortBy) {
-                case 'price':
-                    $sortBy = "price";
-                    break;
-                case 'priceDesc':
-                    $sortBy = "price";
-                    $order = "DESC";
-                    break;
-                case 'nameDesc':
-                    $order = "DESC";
-                    break;
-            }
-        }
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function filter(Request $request)
+    {
+        $helper = new Helper();
+        $req = $helper->requestBuilder($request);
 
-        // DB::statement("SET SQL_MODE=''");
+        $query = $helper->queryBuilder($req['query'], $req['categories'], $req['brands'], $req['priceMax'], $req['priceMin']);
 
-        if ($request->has('query') && $request->query('query') != null) {
-            $query_string = $request->query('query');
-        }
+        $max_product_price = round((clone $query['products'])->max('price'));
+        $min_product_price = round((clone $query['products'])->min('price'));
+        $total_records = round((clone $query['products'])->count('id'));
 
-        if ($request->has('priceMin') && $request->query('priceMin') != null && is_numeric($request->query('priceMin')) && $request->has('priceMax') && $request->query('priceMax') != null && is_numeric($request->query('priceMax'))) {
-            $priceMin = $request->query('priceMin');
-            $priceMax = $request->query('priceMax');
-        }
-
-        $products = Product::where('name', 'LIKE', '%' . $query_string . '%')
-            ->whereBetween('price', [$priceMin, $priceMax]);
-
-        $brands = Brand::withCount(['products' => function ($q) use ($query_string, $priceMin, $priceMax) {
-            $q->where('products.name', 'LIKE', '%' . $query_string . '%')->whereBetween('products.price', [$priceMin, $priceMax]);
-        }])->having('products_count', '>', 0);
-        $categories = ProductCategory::withCount(['subProducts' => function ($q) use ($query_string, $priceMin, $priceMax) {
-            $q->where('products.name', 'LIKE', '%' . $query_string . '%')->whereBetween('products.price', [$priceMin, $priceMax]);
-        }])->with(['subcategories' => function ($query) use ($query_string, $priceMin, $priceMax) {
-            $query->withCount(['products' => function ($q) use ($query_string, $priceMin, $priceMax) {
-                $q->where('name', 'LIKE', '%' . $query_string . '%')->whereBetween('price', [$priceMin, $priceMax]);
-            }])->having('products_count', '>', 0);
-        }])->having('sub_products_count', '>', 0);
-
-        if (count($arrayCategories) > 0) {
-            $products = $products->where(function ($query) use ($arrayCategories) {
-                $query->withCount(['category' => function ($q) use ($arrayCategories) {
-                    $q->whereIn('product_category_id', $arrayCategories);
-                }])->having('sub_categories_count', '>', 0);
-            });
-        }
-
-        if (count($arrayBrands) > 0) {
-            $products = $products->whereIn('product_brand_id', $arrayBrands);
-        }
-
-        return ["products" => $products->with('image')->orderBy($sortBy, $order)->paginate(15), "categories" => $categories->get(), 'brands' => $brands->get()];
+        return ["categories" => $query['categories']->get(), "brands" => $query['brands']->get(), "max_product_price" => $max_product_price, "min_product_price" => $min_product_price, "total_records" => $total_records];
     }
     /**
      * Display a listing of the resource.
@@ -182,7 +142,12 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return $product->load('image', 'subcategory_with_category', 'brand', 'images', 'specification_attributes');
+        $product->load('image', 'subcategory_with_category', 'brand', 'images', 'specification_attributes', 'reviews');
+        $product->similarProducts;
+        $product->similarProduct;
+        $product->popularBrands;
+
+        return $product;
     }
 
     /**

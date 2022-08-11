@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Rule;
+use Intervention\Image\Facades\Image;
+
 
 class ProductCategoryController extends Controller
 {
@@ -42,15 +44,20 @@ class ProductCategoryController extends Controller
      */
     public function store(Request $request, ProductCategory $category)
     {
-        $request->validate(['name'=>'required|min:3|unique:product_categories,name',
-        'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
+        $request->validate([
+            'name' => 'required|min:3|unique:product_categories,name',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
 
         $data = $request->all();
 
-        $imageName = time() . '.' . $request->image->extension();
-
-        $request->image->move(public_path('/storage/images/'),$imageName);
+        $img = Image::make($request->image->path());
+        $imageName = time() . $request->image->extension();
+        $img->resize(500, 500, function ($constraint) {
+            $constraint->aspectRatio();
+        })->save(public_path('/storage/images/' . $imageName));
         $data['image'] = $imageName;
+
 
         $category->create($data);
         return redirect('/products/categories')
@@ -67,7 +74,7 @@ class ProductCategoryController extends Controller
     {
         return view('products.categories.show', [
             'category' => $category,
-            'products' => Product::where(function($query) use ($category){
+            'products' => Product::where(function ($query) use ($category) {
                 $query->where('product_category_id', $category->id);
             })->latest()->get()
         ]);
@@ -93,15 +100,19 @@ class ProductCategoryController extends Controller
      */
     public function update(Request $request, ProductCategory $category)
     {
-        $request->validate(['name'=>'required|min:3|unique:product_categories,name',
-        'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
+        $request->validate([
+            'name' => 'required|min:3',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
 
         $data = $request->all();
         if ($request->image) {
-            File::delete(public_path('/storage/images/' . $request->image));
-            $imageName = time() . '.' . $request->image->extension();
-
-            $request->image->move(public_path('/storage/images/'), $imageName);
+            File::delete(public_path('/storage/images/' . $category->image));
+            $img = Image::make($request->image->path());
+            $imageName = time() . $request->image->extension();
+            $img->resize(500, 500, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save(public_path('/storage/images/' . $imageName));
             $data['image'] = $imageName;
         }
 
