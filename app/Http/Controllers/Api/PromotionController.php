@@ -26,6 +26,6 @@ class PromotionController extends Controller
      */
     public function show(Promotion $promotion)
     {
-        return $promotion;
+        return $promotion->load('products');
     }
 }

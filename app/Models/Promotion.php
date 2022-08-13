@@ -13,4 +13,9 @@ class Promotion extends Model
     protected $fillable = [
         'title', 'description', 'image',
     ];
+
+    public function products()
+    {
+        return $this->hasManyThrough('App\Models\Product', 'App\Models\FeaturedProduct', 'promotion_id', 'id', 'id', 'product_id')->with('image');
+    }
 }

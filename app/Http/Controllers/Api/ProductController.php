@@ -142,7 +142,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('image', 'subcategory_with_category', 'brand', 'images', 'specification_attributes', 'reviews');
+        $product->load('image', 'subcategory_with_category', 'brand', 'images', 'specification_attributes', 'publishedReviews');
         $product->similarProducts;
         $product->similarProduct;
         $product->popularBrands;

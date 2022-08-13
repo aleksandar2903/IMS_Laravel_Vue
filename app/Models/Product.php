@@ -93,6 +93,11 @@ class Product extends Model
         return $this->hasMany('App\Models\Review')->orderBy('created_at', 'desc')->take(5);
     }
 
+    public function publishedReviews()
+    {
+        return $this->hasMany('App\Models\Review')->orderBy('created_at', 'desc')->where('published', true)->take(5);
+    }
+
     public function getRatingAttribute()
     {
         return $this->hasMany('App\Models\Review')->avg('rating');
