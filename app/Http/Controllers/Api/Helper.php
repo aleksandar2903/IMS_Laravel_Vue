@@ -13,20 +13,26 @@ class Helper
     /**
      * Store a newly created resource in storage.
      *
+     * @param  String  $request
+     */
+    public function stringToArray(?string $request)
+    {
+        $array = [];
+        if (!empty($request)) {
+            $array = explode(',', $request);
+        }
+
+        return $array;
+    }
+    /**
+     * Store a newly created resource in storage.
+     *
      * @param  \Illuminate\Http\Request  $request
+     * @param  Array $arrayCategories
+     * @param  Array $arrayBrands
      */
     public function requestBuilder(Request $request)
     {
-        $arrayCategories = [];
-        if ($request->has('categories') && $request->categories != null) {
-            $arrayCategories = explode(',', $request->categories);
-        }
-
-        $arrayBrands = [];
-        if ($request->has('brands') && $request->brands != null) {
-            $arrayBrands = explode(',', $request->brands);
-        }
-
         $query_string = "";
         $sortBy = "name";
         $order = "ASC";
@@ -58,8 +64,6 @@ class Helper
         }
 
         return [
-            'categories' => $arrayCategories,
-            'brands' => $arrayBrands,
             'query' => $query_string,
             'sortBy' => $sortBy,
             'order' => $order,
@@ -67,7 +71,7 @@ class Helper
             'priceMax' => $priceMax,
         ];
     }
-    public function queryBuilder($query_string, $arrayCategories, $arrayBrands, $priceMax, $priceMin, $category = 0)
+    public function queryBuilder($query_string, array $arrayCategories, array $arrayBrands, $priceMax, $priceMin, $category = 0)
     {
 
         $products = Product::whereBetween('price', [$priceMin, $priceMax])->where(function ($query) use ($query_string) {

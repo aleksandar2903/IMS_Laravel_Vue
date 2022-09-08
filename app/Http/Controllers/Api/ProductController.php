@@ -51,15 +51,57 @@ class ProductController extends Controller
     public function filter(Request $request)
     {
         $helper = new Helper();
-        $req = $helper->requestBuilder($request);
+        $selectedCategorieIds = $helper->stringToArray($request->categories);
+        $selectedBrandIds = $helper->stringToArray($request->brands);
+        $req = $helper->requestBuilder($request, $selectedCategorieIds, $selectedBrandIds);
 
-        $query = $helper->queryBuilder($req['query'], $req['categories'], $req['brands'], $req['priceMax'], $req['priceMin']);
+        $query = $helper->queryBuilder($req['query'], $selectedCategorieIds, $selectedBrandIds, $req['priceMax'], $req['priceMin']);
 
         $max_product_price = round((clone $query['products'])->max('price'));
         $min_product_price = round((clone $query['products'])->min('price'));
         $total_records = round((clone $query['products'])->count('id'));
 
-        return ["categories" => $query['categories']->get(), "brands" => $query['brands']->get(), "max_product_price" => $max_product_price, "min_product_price" => $min_product_price, "total_records" => $total_records];
+        $activeFilters = [];
+        $selectedCategories = [];
+        $selectedBrands = [];
+
+        $mappedCategories = $query['categories']->get();
+        foreach ($mappedCategories as $category) {
+            if (in_array($category->id, $selectedCategorieIds)) {
+                $category->is_selected = true;
+                array_push($selectedCategories, $category);
+            } else {
+                $category->is_selected = false;
+            }
+        };
+
+        $mappedBrands = $query['brands']->get();
+        foreach ($mappedBrands as $brand) {
+            if (in_array($brand->id, $selectedBrandIds)) {
+                $brand->is_selected = true;
+                array_push($selectedBrands, $brand);
+            } else {
+                $brand->is_selected = false;
+            }
+        };
+
+        $activeFilters = [
+            'categories' => $selectedCategories,
+            'brands' => $selectedBrands,
+        ];
+
+        $sort = $req['order'] == 'DESC' ? $req['sortBy'] . 'DESC' : $req['sortBy'];
+
+        return [
+            "categories" => $mappedCategories, "brands" => $mappedBrands,
+            "activeFilters" => $activeFilters, "max_product_price" => $max_product_price, "min_product_price" => $min_product_price, "total_records" => $total_records,
+            "keyword" => $req['query'],
+            "sort" => $sort,
+            'price' => [
+                'min' => $req['priceMin'],
+                'max' => $req['priceMax'],
+            ]
+        ];
     }
     /**
      * Display a listing of the resource.
@@ -146,6 +188,15 @@ class ProductController extends Controller
         $product->similarProducts;
         $product->similarProduct;
         $product->popularBrands;
+
+        foreach ($product->images as $key => $image) {
+            if ($image->id == $product->image->id) {
+                $temp = $product->images[0];
+                $product->images[0] = $image;
+                $product->images[$key] = $temp;
+                break;
+            }
+        }
 
         return $product;
     }

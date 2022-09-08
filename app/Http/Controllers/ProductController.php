@@ -30,9 +30,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::withCount(['solds' => function($sold){
+        $products = Product::withCount(['solds' => function ($sold) {
             $sold->select(DB::raw('SUM(qty) as solds'));
-        }])->orderBy('solds_count', 'DESC')->get();
+        }])->orderBy('created_at', 'DESC')->get();
 
         return view('products.index', compact('products'));
     }

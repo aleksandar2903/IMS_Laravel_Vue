@@ -49,7 +49,9 @@ class CategoryBrandController extends Controller
     public function filter(Request $request, ProductCategory $category)
     {
         $helper = new Helper();
-        $req = $helper->requestBuilder($request);
+        $selectedCategories = $helper->stringToArray($request->categories);
+        $selectedBrands = $helper->stringToArray($request->brands);
+        $req = $helper->requestBuilder($request, $selectedCategories, $selectedBrands);
 
         $query = $helper->queryBuilder($req['query'], $req['categories'], $req['brands'], $req['priceMax'], $req['priceMin'], $category->id);
 
@@ -57,7 +59,12 @@ class CategoryBrandController extends Controller
         $min_product_price = round((clone $query['products'])->min('price'));
         $total_records = round((clone $query['products'])->count('id'));
 
-        return ["categories" => $query['categories']->get(), "brands" => $query['brands']->get(), "max_product_price" => $max_product_price, "min_product_price" => $min_product_price, "total_records" => $total_records];
+        $mappedCategories = $query['categories']->get()->map(function ($category) {
+            $category->isSelected = true;
+            return $category;
+        });
+
+        return ["categories" => $mappedCategories, "brands" => $query['brands']->get(), "max_product_price" => $max_product_price, "min_product_price" => $min_product_price, "total_records" => $total_records];
     }
     /**
      * Display a listing of the resource.
