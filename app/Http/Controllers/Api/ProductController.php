@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Image;
 
+use function PHPSTORM_META\type;
+
 class ProductController extends Controller
 {
 
@@ -34,12 +36,19 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $helper = new Helper();
-        $req = $helper->requestBuilder($request);
-        $query = $helper->queryBuilder($req['query'], $req['categories'], $req['brands'], $req['priceMax'], $req['priceMin']);
+        $selectedCategorieIds = $helper->stringToArray($request->categories);
+        $selectedBrandIds = $helper->stringToArray($request->brands);
+        $req = $helper->requestBuilder($request, $selectedCategorieIds, $selectedBrandIds);
+
+        $query = $helper->queryBuilder($req['query'], $selectedCategorieIds, $selectedBrandIds, $req['priceMax'], $req['priceMin']);
 
         $productQuery = $query['products'];
 
-        return $productQuery->with('image')->orderBy($req['sortBy'], $req['order'])->paginate(15);
+        $paginattedProducts = $productQuery->with('image')->orderBy($req['sortBy'], $req['order'])->paginate(15);
+
+        $this->favouriteCheck($paginattedProducts);
+
+        return $paginattedProducts;
     }
 
     /**
@@ -110,7 +119,11 @@ class ProductController extends Controller
      */
     public function popular()
     {
-        return Product::withCount('solds')->with('image')->orderBy('solds_count', 'DESC')->paginate(10);
+        $paginattedProducts = Product::withCount('solds')->with('image')->orderBy('solds_count', 'DESC')->paginate(10);
+
+        $this->favouriteCheck($paginattedProducts);
+
+        return $paginattedProducts;
     }
     /**
      * Display a listing of the resource.
@@ -119,7 +132,11 @@ class ProductController extends Controller
      */
     public function newest()
     {
-        return Product::with('image')->orderBy('created_at', 'DESC')->paginate(10);
+        $paginattedProducts = Product::with('image')->orderBy('created_at', 'DESC')->paginate(10);
+
+        $this->favouriteCheck($paginattedProducts);
+
+        return $paginattedProducts;
     }
     /**
      * Display a listing of the resource.
@@ -128,9 +145,13 @@ class ProductController extends Controller
      */
     public function gaming()
     {
-        return Product::withCount(['category' => function ($q) {
+        $paginattedProducts = Product::withCount(['category' => function ($q) {
             $q->where('product_category_id', '=', 1);
         }])->having('category_count', '>', 0)->with('image')->paginate(10);
+
+        $this->favouriteCheck($paginattedProducts);
+
+        return $paginattedProducts;
     }
     /**
      * Display a listing of the resource.
@@ -230,5 +251,24 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+    }
+
+    private function favouriteCheck($req)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user == null) {
+            return;
+        }
+        $favourites = Auth::guard('sanctum')->user()->favourites;
+
+        if ($favourites == null) {
+            return;
+        }
+
+        $req->withQueryString()
+            ->map(function ($product) use ($favourites) {
+                $product->favourite = $favourites->contains('product_id', $product->id);
+                return $product;
+            });
     }
 }
