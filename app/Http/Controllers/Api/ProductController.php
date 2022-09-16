@@ -35,12 +35,11 @@ class ProductController extends Controller
      */
     public function search(Request $request)
     {
-        $helper = new Helper();
-        $selectedCategorieIds = $helper->stringToArray($request->categories);
-        $selectedBrandIds = $helper->stringToArray($request->brands);
-        $req = $helper->requestBuilder($request, $selectedCategorieIds, $selectedBrandIds);
+        $selectedCategorieIds = Helper::stringToArray($request->categories);
+        $selectedBrandIds = Helper::stringToArray($request->brands);
+        $req = Helper::requestBuilder($request, $selectedCategorieIds, $selectedBrandIds);
 
-        $query = $helper->queryBuilder($req['query'], $selectedCategorieIds, $selectedBrandIds, $req['priceMax'], $req['priceMin']);
+        $query = Helper::queryBuilder($req['query'], $selectedCategorieIds, $selectedBrandIds, $req['priceMax'], $req['priceMin']);
 
         $productQuery = $query['products'];
 
@@ -59,12 +58,11 @@ class ProductController extends Controller
      */
     public function filter(Request $request)
     {
-        $helper = new Helper();
-        $selectedCategorieIds = $helper->stringToArray($request->categories);
-        $selectedBrandIds = $helper->stringToArray($request->brands);
-        $req = $helper->requestBuilder($request, $selectedCategorieIds, $selectedBrandIds);
+        $selectedCategorieIds = Helper::stringToArray($request->categories);
+        $selectedBrandIds = Helper::stringToArray($request->brands);
+        $req = Helper::requestBuilder($request, $selectedCategorieIds, $selectedBrandIds);
 
-        $query = $helper->queryBuilder($req['query'], $selectedCategorieIds, $selectedBrandIds, $req['priceMax'], $req['priceMin']);
+        $query = Helper::queryBuilder($req['query'], $selectedCategorieIds, $selectedBrandIds, $req['priceMax'], $req['priceMin']);
 
         $max_product_price = round((clone $query['products'])->max('price'));
         $min_product_price = round((clone $query['products'])->min('price'));
@@ -122,6 +120,18 @@ class ProductController extends Controller
         $paginattedProducts = Product::withCount('solds')->with('image')->orderBy('solds_count', 'DESC')->paginate(10);
 
         $this->favouriteCheck($paginattedProducts);
+
+        return $paginattedProducts;
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function bulk(Request $req)
+    {
+        $ids = Helper::stringToArray($req->ids);
+        $paginattedProducts = Product::whereIn('id', $ids)->with('image')->orderBy('name', 'DESC')->get();
 
         return $paginattedProducts;
     }
@@ -210,6 +220,16 @@ class ProductController extends Controller
         $product->similarProduct;
         $product->popularBrands;
 
+        $favourites = $this->getFavourites();
+        if ($favourites != null) {
+            $product->favourite = $favourites->contains('product_id', $product->id);;
+        }
+
+        $cart = $this->getCart();
+        if ($cart != null) {
+            $product->in_cart = $cart->contains('product_id', $product->id);;
+        }
+
         foreach ($product->images as $key => $image) {
             if ($image->id == $product->image->id) {
                 $temp = $product->images[0];
@@ -218,7 +238,6 @@ class ProductController extends Controller
                 break;
             }
         }
-
         return $product;
     }
 
@@ -253,14 +272,27 @@ class ProductController extends Controller
     {
     }
 
-    private function favouriteCheck($req)
+    private function getFavourites()
     {
         $user = Auth::guard('sanctum')->user();
         if ($user == null) {
-            return;
+            return null;
         }
-        $favourites = Auth::guard('sanctum')->user()->favourites;
+        return $user->favourites;
+    }
 
+    private function getCart()
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user == null) {
+            return null;
+        }
+        return $user->carts;
+    }
+
+    private function favouriteCheck($req)
+    {
+        $favourites = $this->getFavourites();
         if ($favourites == null) {
             return;
         }

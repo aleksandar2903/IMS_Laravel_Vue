@@ -16,7 +16,7 @@ class CartController extends Controller
      */
     public function index()
     {
-        return Cart::where('user_id', Auth::id())->with('product')->paginate(15);
+        return Cart::where('user_id', Auth::id())->with('product')->get();
     }
 
     /**

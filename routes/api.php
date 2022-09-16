@@ -30,7 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'App\Http\Controllers\Api\FavouriteController'
     );
     Route::apiResource(
-        'carts',
+        'cart',
         'App\Http\Controllers\Api\CartController'
     );
 
@@ -48,6 +48,7 @@ Route::get('/tokens/create', function (Request $request) {
 Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])->name('api.auth.login');
 
 Route::get('/search', [App\Http\Controllers\Api\ProductController::class, 'search'])->name('api.products.search');
+Route::get('/products/bulk', [App\Http\Controllers\Api\ProductController::class, 'bulk'])->name('api.products.bulk');
 Route::get('/filter', [App\Http\Controllers\Api\ProductController::class, 'filter'])->name('api.products.filter');
 Route::get('/products/newest', [App\Http\Controllers\Api\ProductController::class, 'newest'])->name('api.products.newest');
 Route::get('/products/popular', [App\Http\Controllers\Api\ProductController::class, 'popular'])->name('api.products.popular');

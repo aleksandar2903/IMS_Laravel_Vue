@@ -15,7 +15,7 @@ class Helper
      *
      * @param  String  $request
      */
-    public function stringToArray(?string $request)
+    public static function stringToArray(?string $request)
     {
         $array = [];
         if (!empty($request)) {
@@ -31,7 +31,7 @@ class Helper
      * @param  Array $arrayCategories
      * @param  Array $arrayBrands
      */
-    public function requestBuilder(Request $request)
+    public static function requestBuilder(Request $request)
     {
         $query_string = "";
         $sortBy = "name";
@@ -71,7 +71,7 @@ class Helper
             'priceMax' => $priceMax,
         ];
     }
-    public function queryBuilder($query_string, array $arrayCategories, array $arrayBrands, $priceMax, $priceMin, $category = 0)
+    public static function queryBuilder($query_string, array $arrayCategories, array $arrayBrands, $priceMax, $priceMin, $category = 0)
     {
 
         $products = Product::whereBetween('price', [$priceMin, $priceMax])->where(function ($query) use ($query_string) {
