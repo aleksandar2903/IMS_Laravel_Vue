@@ -22,8 +22,7 @@
                             </button>
                         </form>
                         @else
-                        <a  class="btn btn-sm btn-primary"
-                             href="{{route('sales.finalize', $sale)}}">
+                        <a class="btn btn-sm btn-primary" href="{{route('sales.finalize', $sale)}}">
                             {{__('Finalize Sale')}}
                         </a>
                         @endif
@@ -31,9 +30,9 @@
                     @endif
                 </div>
             </div>
-            <div class="table-responsive table-responsive-xl w-100 display compact table-responsive-lg table-responsive-md table-responsive-sm">
-                <table
-                    class="table" id="sale-table">
+            <div
+                class="table-responsive table-responsive-xl w-100 display compact table-responsive-lg table-responsive-md table-responsive-sm">
+                <table class="table" id="sale-table">
                     <thead>
                         <th>ID</th>
                         <th>{{__('Date')}}</th>
@@ -49,9 +48,9 @@
                         <tr>
                             <td>{{ $sale->id }}</td>
                             <td>{{ $sale->created_at->format('d-M-Y') }}</td>
-                            <td>{{ $sale->user->name }}</td>
-                            <td><a
-                                    href="{{ route('clients.show', $sale->client) }}">{{ $sale->client->name }}<br>{{ $sale->client->document_type }}-{{ $sale->client->document_id }}</a>
+                            <td>{{ ($sale->user ? $sale->user->name : '-') }}</td>
+                            <td><a href="{{ route('clients.show', $sale->client) }}">{{ $sale->client->name }}<br>{{
+                                    $sale->client->document_type }}-{{ $sale->client->document_id }}</a>
                             </td>
                             <td>{{ $sale->products->count() }}</td>
                             <td>{{ $sale->products->sum('qty') }}</td>
@@ -96,9 +95,9 @@
                     @endif
                 </div>
             </div>
-            <div class="table-responsive table-responsive-xl w-100 display compact table-responsive-lg table-responsive-md table-responsive-sm">
-                <table
-                    class="table datatable-basic">
+            <div
+                class="table-responsive table-responsive-xl w-100 display compact table-responsive-lg table-responsive-md table-responsive-sm">
+                <table class="table datatable-basic">
                     <thead>
                         <th>ID</th>
                         <th>{{ __('Category')}}</th>
@@ -112,11 +111,11 @@
                         @foreach ($sale->products as $sold_product)
                         <tr>
                             <td>{{ $sold_product->product->id }}</td>
-                            <td><a
-                                    href="{{ route('categories.show', $sold_product->product->category) }}">{{ $sold_product->product->category->name }}</a>
+                            <td><a href="{{ route('categories.show', $sold_product->product->category) }}">{{
+                                    $sold_product->product->category->name }}</a>
                             </td>
-                            <td><a
-                                    href="{{ route('products.show', $sold_product->product) }}">{{ $sold_product->product->name }}</a>
+                            <td><a href="{{ route('products.show', $sold_product->product) }}">{{
+                                    $sold_product->product->name }}</a>
                             </td>
                             <td>
                                 {{ $sold_product->qty }}
@@ -130,7 +129,8 @@
                                     method="post" class="d-inline">
                                     @csrf
                                     @method('delete')
-                                    <button type="submit" title="{{__('Delete Product')}}" class="btn border-0 p-0 text-primary mr-4">
+                                    <button type="submit" title="{{__('Delete Product')}}"
+                                        class="btn border-0 p-0 text-primary mr-4">
                                         <i class="fas fa-trash    "></i>
                                     </button>
                                 </form>
@@ -161,8 +161,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('sales.product.store', $sale) }}"
-                            autocomplete="off">
+                        <form method="post" action="{{ route('sales.product.store', $sale) }}" autocomplete="off">
                             @csrf
                             <div class="p-2">
                                 <input type="hidden" name="sale_id" value="{{ $sale->id }}">
@@ -179,7 +178,8 @@
                                         @else
                                         <option price="{{$product->price}}" value="{{$product['id']}}"
                                             name="{{$product->price}}">[{{ $product->category->name }}]
-                                            {{ $product->name }} - {{__('Price')}}: {{ $product->price }} - {{__('On Stock')}}:
+                                            {{ $product->name }} - {{__('Price')}}: {{ $product->price }} - {{__('On
+                                            Stock')}}:
                                             {{$product->stock}} {{__('Unit')}}</option>
                                         @endif
                                         @endforeach
@@ -188,7 +188,8 @@
                                 </div>
 
                                 <div class="form-group{{ $errors->has('product_id') ? ' has-danger' : '' }}">
-                                    <label class="form-control-label" for="input-price">{{ __('Price')}} ({{ __('Unit')}})</label>
+                                    <label class="form-control-label" for="input-price">{{ __('Price')}} ({{
+                                        __('Unit')}})</label>
                                     <input type="number" name="price" id="input-price" step=".01"
                                         class="form-control form-control-alternative{{ $errors->has('product_id') ? ' is-invalid' : '' }}"
                                         value="1" required>

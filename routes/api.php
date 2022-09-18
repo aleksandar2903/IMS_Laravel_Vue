@@ -25,19 +25,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return User::all();
     });
 
-    Route::apiResource(
-        'favourites',
-        'App\Http\Controllers\Api\FavouriteController'
-    );
-    Route::apiResource(
-        'cart',
-        'App\Http\Controllers\Api\CartController'
-    );
+    Route::name('api')->group(function () {
+        Route::apiResource(
+            'favourites',
+            'App\Http\Controllers\Api\FavouriteController'
+        );
+        Route::apiResource(
+            'cart',
+            'App\Http\Controllers\Api\CartController'
+        );
 
-    Route::apiResource(
-        'reviews',
-        'App\Http\Controllers\Api\ReviewController'
-    )->except(['index', 'create', 'edit']);
+        Route::apiResource(
+            'reviews',
+            'App\Http\Controllers\Api\ReviewController'
+        )->except(['index', 'create', 'edit']);
+
+        Route::apiResource(
+            'sales',
+            'App\Http\Controllers\Api\SaleController'
+        );
+    });
 });
 
 Route::get('/tokens/create', function (Request $request) {
@@ -54,7 +61,7 @@ Route::get('/products/newest', [App\Http\Controllers\Api\ProductController::clas
 Route::get('/products/popular', [App\Http\Controllers\Api\ProductController::class, 'popular'])->name('api.products.popular');
 Route::get('/products/gaming', [App\Http\Controllers\Api\ProductController::class, 'gaming'])->name('api.products.gaming');
 Route::get('/autocomplete', [App\Http\Controllers\Api\ProductController::class, 'autocomplete'])->name('api.products.autocomplete');
-Route::get('/categories/{category}/search', [App\Http\Controllers\Api\CategoryController::class, 'search'])->name('api.categories.search');
+Route::get('/categories/{category}/search', [App\Http\Controllers\Api\CategoryBrandController::class, 'search'])->name('api.categories.search');
 Route::get('/categories', [App\Http\Controllers\Api\CategoryBrandController::class, 'categories'])->name('api.categories');
 Route::get('/brands', [App\Http\Controllers\Api\CategoryBrandController::class, 'brands'])->name('api.brands');
 Route::get('/categories/{category}/filter', [App\Http\Controllers\Api\CategoryBrandController::class, 'filter'])->name('api.categories.filter');

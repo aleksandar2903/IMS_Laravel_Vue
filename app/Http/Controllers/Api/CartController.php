@@ -47,7 +47,7 @@ class CartController extends Controller
                 return response()->json(['success' => 'Product deleted from cart'], 200);
             } else {
 
-                $user->carts()->create(['product_id' => $request->product_id, 'quantity' => 1]);
+                $user->carts()->create(['product_id' => $request->product_id, 'quantity' => isset($request->quantity) ? ($request->quantity > 0 ? $request->quantity : 1) : 1]);
             }
         } catch (\Throwable $th) {
             response()->json(['error' => 'Something went wrong', 500]);
@@ -87,7 +87,11 @@ class CartController extends Controller
      */
     public function update(Request $request, Cart $cart)
     {
-        $cart->update(['quantity' => $request->quantity]);
+        if (isset($request->quantity) && $request->quantity > 0) {
+            $cart->update(['quantity' => $request->quantity]);
+        } else {
+            response()->json(['error' => 'The quantity must be greater than zero.']);
+        }
 
         return response()->json(['success' => 'Cart updated.']);
     }

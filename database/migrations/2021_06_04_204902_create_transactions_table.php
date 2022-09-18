@@ -24,7 +24,7 @@ class CreateTransactionsTable extends Migration
             $table->unsignedBigInteger('provider_id')->nullable();
             $table->unsignedBigInteger('payment_method_id');
             $table->decimal('amount', 10, 2)->default(0);
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
             $table->foreign('payment_method_id')->references('id')->on('payment_methods');
             $table->foreign('client_id')->references('id')->on('clients');
