@@ -212,6 +212,30 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link" href="{{route('subcategories.index')}}">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span class="nav-link-text">{{__('Subcategories')}}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{route('brands.index')}}">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span class="nav-link-text">{{__('Brands')}}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{route('promotions.index')}}">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span class="nav-link-text">{{__('Promotions')}}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{route('specifications.index')}}">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span class="nav-link-text">{{__('Product Specifications')}}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link" href="{{route('methods.index')}}">
                                         <i class="fas fa-money-bill    "></i>
                                         <span class="nav-link-text">{{__('Payment Methods')}}</span>
@@ -243,7 +267,8 @@
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <!-- Search form -->
                         @php ($names = array('Search'=>__('Search'), 'Products'=>__('Products'),
-                        'Categories'=>__('Categories'), 'Clients'=>__('Clients'), 'Suppliers'=>__('Suppliers'), 'Unit'=>__('Unit')))
+                        'Categories'=>__('Categories'), 'Clients'=>__('Clients'), 'Suppliers'=>__('Suppliers'),
+                        'Unit'=>__('Unit')))
 
                         <search-component :text={!! json_encode($names) !!}></search-component>
                         <!-- Navbar links -->
@@ -274,13 +299,15 @@
                                 <div class="dropdown-menu dropdown-menu-right">
                                     @foreach(config('app.languages') as $langLocale => $langName)
                                     <a class="dropdown-item fw-bold"
-                                        href="{{ url()->current() }}?change_language={{ $langLocale }}">{{ strtoupper($langLocale) }}
+                                        href="{{ url()->current() }}?change_language={{ $langLocale }}">{{
+                                        strtoupper($langLocale) }}
                                         ({{ $langName }})</a>
                                     @endforeach
                                 </div>
                             </li>
                             @endif
-                            @php ($text = array('Stock'=>__('On Stock'), 'Have'=>__('You have'), 'notifications'=>__('notifications')))
+                            @php ($text = array('Stock'=>__('On Stock'), 'Have'=>__('You have'),
+                            'notifications'=>__('notifications')))
                             <notifications-component :text="{{ json_encode($text) }}"></notifications-component>
 
                             <li class="nav-item dropdown">

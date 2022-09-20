@@ -1923,8 +1923,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ['text'],
+  props: ["text"],
   created: function created() {
     var _this = this;
 
@@ -60977,12 +60988,16 @@ var render = function() {
       "div",
       {
         staticClass:
-          "\n      dropdown-menu dropdown-menu-xl dropdown-menu-right\n      py-0\n      overflow-hidden\n    "
+          "\n    dropdown-menu dropdown-menu-xl dropdown-menu-right\n    py-0\n    overflow-hidden\n  "
       },
       [
         _c("div", { staticClass: "px-3 py-3" }, [
           _c("h6", { staticClass: "text-sm text-muted m-0" }, [
-            _vm._v("\n       " + _vm._s(_vm.text.Have) + "\n        "),
+            _vm._v(
+              "\n                " +
+                _vm._s(_vm.text.Have) +
+                "\n                "
+            ),
             _c("strong", { staticClass: "text-primary" }, [
               _vm._v(
                 "(" +
@@ -60992,7 +61007,11 @@ var render = function() {
                   ")"
               )
             ]),
-            _vm._v("\n        " + _vm._s(_vm.text.notifications) + ".\n      ")
+            _vm._v(
+              "\n                " +
+                _vm._s(_vm.text.notifications) +
+                ".\n            "
+            )
           ])
         ]),
         _vm._v(" "),
@@ -61018,7 +61037,8 @@ var render = function() {
                         attrs: {
                           alt: "Image placeholder",
                           src:
-                            "/storage/images/" + notification.data.product.image
+                            "/storage/images/" +
+                            notification.data.product.image.w500
                         }
                       })
                     ]),
@@ -61034,9 +61054,9 @@ var render = function() {
                           _c("div", [
                             _c("h4", { staticClass: "mb-0 text-sm" }, [
                               _vm._v(
-                                "\n                  " +
+                                "\n                                    " +
                                   _vm._s(notification.data.product.name) +
-                                  "\n                "
+                                  "\n                                "
                               )
                             ])
                           ]),
@@ -61047,15 +61067,15 @@ var render = function() {
                       _vm._v(" "),
                       _c("p", { staticClass: "text-sm mb-0" }, [
                         _vm._v(
-                          "\n              " +
+                          "\n                            " +
                             _vm._s(_vm.text.Stock) +
-                            ":\n              "
+                            ":\n                            "
                         ),
                         _c("span", { staticClass: "text-danger" }, [
                           _vm._v(
-                            "\n                " +
+                            "\n                                " +
                               _vm._s(notification.data.product.stock) +
-                              "\n              "
+                              "\n                            "
                           )
                         ])
                       ])

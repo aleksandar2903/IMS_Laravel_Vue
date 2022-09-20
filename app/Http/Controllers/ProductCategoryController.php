@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Rule;
+use Intervention\Image\Facades\Image;
+
 
 class ProductCategoryController extends Controller
 {
@@ -41,8 +44,22 @@ class ProductCategoryController extends Controller
      */
     public function store(Request $request, ProductCategory $category)
     {
-        $request->validate(['name'=>'required|min:3|unique:product_categories,name']);
-        $category->create($request->all());
+        $request->validate([
+            'name' => 'required|min:3|unique:product_categories,name',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+
+        $data = $request->all();
+
+        $img = Image::make($request->image->path());
+        $imageName = time() . $request->image->extension();
+        $img->resize(500, 500, function ($constraint) {
+            $constraint->aspectRatio();
+        })->save(public_path('/storage/images/' . $imageName));
+        $data['image'] = $imageName;
+
+
+        $category->create($data);
         return redirect('/products/categories')
             ->withStatus(__('Category successfully created.'));
     }
@@ -57,7 +74,9 @@ class ProductCategoryController extends Controller
     {
         return view('products.categories.show', [
             'category' => $category,
-            'products' => Product::where('product_category_id', $category->id)->latest()->get()
+            'products' => Product::where(function ($query) use ($category) {
+                $query->where('product_category_id', $category->id);
+            })->latest()->get()
         ]);
     }
 
@@ -81,9 +100,23 @@ class ProductCategoryController extends Controller
      */
     public function update(Request $request, ProductCategory $category)
     {
-        $request->validate(['name'=>'required|min:3|unique:product_categories,name']);
+        $request->validate([
+            'name' => 'required|min:3',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
 
-        $category->update($request->all());
+        $data = $request->all();
+        if ($request->image) {
+            File::delete(public_path('/storage/images/' . $category->image));
+            $img = Image::make($request->image->path());
+            $imageName = time() . $request->image->extension();
+            $img->resize(500, 500, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save(public_path('/storage/images/' . $imageName));
+            $data['image'] = $imageName;
+        }
+
+        $category->update($data);
 
         return redirect('/products/categories')
             ->withStatus(__('Category successfully updated.'));
@@ -97,6 +130,9 @@ class ProductCategoryController extends Controller
      */
     public function destroy(ProductCategory $category)
     {
+        if ($category->image) {
+            File::delete(public_path('/storage/images/' . $category->image));
+        }
         $category->delete();
 
         return redirect('/products/categories')

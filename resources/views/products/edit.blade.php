@@ -28,19 +28,36 @@
                                 autofocus>
                             @include('alerts.feedback', ['field' => 'name'])
                         </div>
-                        <div class="form-group{{ $errors->has('product_category_id') ? ' has-danger' : '' }}">
-                            <label class="form-control-label" for="input-name">{{ __('Category')}}</label>
-                            <select name="product_category_id" id="input-category"
+                        <div class="form-group{{ $errors->has('product_subcategory_id') ? ' has-danger' : '' }}">
+                            <label class="form-control-label" for="input-subcategory">{{ __('Subategory')}}</label>
+                            <select name="product_subcategory_id" id="input-subcategory"
                                 class="form-select {{ $errors->has('name') ? ' is-invalid' : '' }}" required>
                                 @foreach ($categories as $category)
-                                @if($category['id'] == old('product_category_id', $product->product_category_id))
-                                <option value="{{$category['id']}}" selected>{{$category['name']}}</option>
+                                @if($category['id'] == old('product_subcategory_id'))
+                                <option value="{{$category['id']}}" selected>
+                                    {{$category->category->name}} &#8594; {{$category['name']}}</option>
                                 @else
-                                <option value="{{$category['id']}}">{{$category['name']}}</option>
+                                <option value="{{$category['id']}}">{{$category->category->name}} &#8594;
+                                    {{$category['name']}}</option>
                                 @endif
                                 @endforeach
                             </select>
-                            @include('alerts.feedback', ['field' => 'product_category_id'])
+                            @include('alerts.feedback', ['field' => 'product_subcategory_id'])
+                        </div>
+
+                        <div class="form-group{{ $errors->has('product_brand_id') ? ' has-danger' : '' }}">
+                            <label class="form-control-label" for="input-brand">{{ __('Brand')}}</label>
+                            <select name="product_brand_id" id="input-brand"
+                                class="form-select-brands {{ $errors->has('name') ? ' is-invalid' : '' }}">
+                                @foreach ($brands as $brand)
+                                @if($brand['id'] == old('product_brand_id'))
+                                <option value="{{$brand['id']}}" selected>{{$brand['name']}}</option>
+                                @else
+                                <option value="{{$brand['id']}}">{{$brand['name']}}</option>
+                                @endif
+                                @endforeach
+                            </select>
+                            @include('alerts.feedback', ['field' => 'product_brand_id'])
                         </div>
 
                         <div class="form-group{{ $errors->has('description') ? ' has-danger' : '' }}">
@@ -64,8 +81,8 @@
                             </div>
                             <div class="col-12 col-lg-4 col-md-4 col-sm-4 col-xl-4">
                                 <div class="form-group{{ $errors->has('stock_defective') ? ' has-danger' : '' }}">
-                                    <label class="form-control-label"
-                                        for="input-stock_defective">{{ __('Defective Stock')}}</label>
+                                    <label class="form-control-label" for="input-stock_defective">{{ __('Defective
+                                        Stock')}}</label>
                                     <input type="number" name="stock_defective" id="input-stock_defective"
                                         class="form-control {{ $errors->has('stock_defective') ? ' is-invalid' : '' }}"
                                         placeholder="{{ __('Defective Stock')}}"
@@ -84,18 +101,105 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="pl-0 col-lg-4 col-md-8 col-sm-12 col-xl-4">
+                        {{-- <div class="pl-0 col-lg-4 col-md-8 col-sm-12 col-xl-4">
                             <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
                                 <label class="form-control-label" for="image">{{ __('Image')}}</label>
                                 <input type="file" name="image" id="image"
                                     class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}">
                                 @include('alerts.feedback', ['field' => 'image'])
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary mt-4">{{ __('Submit')}}</button>
                         </div>
+                    </div>
+                </form>
+                <label class="mt-5 mb-2 form-control-label">{{ __('Specification Attributes')}}</label>
+                <div class="form-group mt-2">
+                    @foreach ($product->attributes as $attribute)
+                    <form method="POST"
+                        action="{{ route('products.product.removeSpecificationAttribute', $attribute) }}" class="row">
+                        @csrf
+                        @method('DELETE')
+                        <div class="col-6">
+                            <p class="font-weight-bold m-auto">{{ $attribute->attribute->name }}</p>
+                        </div>
+                        <div class="col-6 d-flex">
+                            <p class="font-weight-normal m-auto">{{ $attribute->value }}</p>
+                            <button class="btn text-danger" type="submit"><i
+                                    class="m-auto fa fa-times    "></i></button>
+                        </div>
+                    </form>
+                    @endforeach
+                    @if($product->attributes->count() == 0)
+                    <span class="mx-auto">{{ __(
+                        'No attributes added yet.')}}</span>
+                    @endif
+                </div>
+                @if ($attributes != null && $attributes->count() > 0)
+                <form method="POST" action="{{ route('products.product.addSpecificationAttribute', $product) }}"
+                    class="mt-5 row{{ $errors->has('attribute_id') ? ' has-danger' : '' }}">
+                    @csrf
+                    <div class="col-12 col-lg-6 col-md-6 col-sm-6 col-xl-6">
+                        <select name="attribute_id" id="input-attribute"
+                            class="form-select-attributes {{ $errors->has('name') ? ' is-invalid' : '' }}">
+                            @foreach ($attributes as $attribute)
+                            <option value="{{$attribute['id']}}">{{$attribute['name']}}</option>
+                            @endforeach
+                        </select>
+                        @include('alerts.feedback', ['field' => 'attribute_id'])
+                    </div>
+                    <div class="col-12 col-lg-6 col-md-6 col-sm-6 col-xl-6">
+                        <input type="text" name="value" id="input-value"
+                            class="form-control {{ $errors->has('value') ? ' is-invalid' : '' }}"
+                            placeholder="{{ __('Value')}}" value="{{ old('value') }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-4 mx-auto">{{ __('Add attribute')}}</button>
+                </form>
+                @endif
+                <label class="mt-5 mb-2 form-control-label">{{ __('Product Images')}}</label>
+                <div class="row">
+                    @if ($product->images->count() == 0)
+                    <span class="mx-auto">{{ __(
+                        'No images uploaded yet.')}}</span>
+                    @endif
+                    @foreach ($product->images as $image)
+                    <div class="col-3">
+                        <img src="{{asset('storage/images/'.$image->w500)}}" alt="{{$image->w500}}"
+                            class="img-thumbnail m-2 h-50">
+                        <div class="d-flex justify-content-center">
+                            <form method="post" action="{{ route('products.product.selectImage', $product) }}">
+                                @csrf
+                                @method('patch')
+                                <input type="hidden" name="image_id" value="{{$image->id}}">
+                                <button class="btn {{ $product->image_id == $image->id ? 'text-success' : '' }}"
+                                    type="submit"><i class="fa fa-check    "></i></button>
+                            </form>
+                            <form method="post" action="{{ route('images.destroy', $image) }}">
+                                @csrf
+                                @method('delete')
+                                <button class="btn text-danger" type="submit"><i class="fa fa-times    "></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <form class="mt-5" method="post" enctype="multipart/form-data" action="{{ route('images.store') }}"
+                    autocomplete="off">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{$product->id}}">
+                    <div class="col-12 col-lg-4 col-md-4 col-sm-4 col-xl-4">
+                        <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
+                            <label class="form-control-label" for="images">{{ __('Add Images')}}</label>
+                            <input type="file" name="images[]" id="images"
+                                class="form-control {{ $errors->has('images') ? ' is-invalid' : '' }}"
+                                accept="image/png, image/jpeg, image/jpg" multiple>
+                            @include('alerts.feedback', ['field' => 'images'])
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary mt-4">{{ __('Upload')}}</button>
                     </div>
                 </form>
             </div>
@@ -107,8 +211,14 @@
 <script>
     $(document).ready(function(){
         new SlimSelect({
-        select: '.form-select'
+        select: '#input-subcategory',
     });
-    })
+    new SlimSelect({
+        select: '#input-brand',
+    });
+    new SlimSelect({
+        select: '#input-attribute',
+    });
+    });
 </script>
 @endpush

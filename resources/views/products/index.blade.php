@@ -38,8 +38,15 @@
                         @foreach ($products as $key => $product)
                         <tr>
                             <td>{{++$key}}</td>
-                            <td><a
-                                    href="{{ route('categories.show', $product->category) }}">{{ $product->category->name }}</a>
+                            <td><a href="{{ route('categories.show', $product->category) }}">{{ $product->category->name
+                                    }}</a>
+                            </td>
+                            <td>
+                                @if($product->brand)
+                                <a href="{{ route('brands.show', $product->brand) }}">{{ $product->brand->name }}</a>
+                                @else
+                                NULL
+                                @endif
                             </td>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->price }}</td>

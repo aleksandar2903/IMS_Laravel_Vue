@@ -10,8 +10,8 @@
                             <h3 class="mb-0">{{ __('Register Sale')}}</h3>
                         </div>
                         <div class="col-4 text-right">
-                            <a href="{{ route('sales.index') }}"
-                                class="btn btn-sm btn-primary">{{ __('Back to List')}}</a>
+                            <a href="{{ route('sales.index') }}" class="btn btn-sm btn-primary">{{ __('Back to
+                                List')}}</a>
                         </div>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
                         <h6 class="heading-small text-muted mb-4">{{__('Client Information')}}</h6>
                         <div class="pl-lg-4">
                             <div class="form-group{{ $errors->has('client_id') ? ' has-danger' : '' }}">
-                                <input type="hidden" name="user_id" value="{{-- {{ Auth::id() }} --}}1">
+                                <input type="hidden" name="user_id" value="{{ Auth::id() }}">
                                 <label class="form-control-label" for="input-name">{{__('Client')}}</label>
                                 <select name="client_id" id="input-category"
                                     class="form-select form-control-alternative{{ $errors->has('client') ? ' is-invalid' : '' }}"

@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductImage;
+use App\Models\ProductSpecificationAttribute;
+use App\Models\ProductSpecificationAttributeValue;
+use App\Models\ProductSubcategory;
+use App\Models\Transaction;
 use App\Notifications\StockAlert;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -11,6 +17,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Image;
+use Mockery\Undefined;
 
 class ProductController extends Controller
 {
@@ -21,7 +30,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::orderBy('updated_at', 'desc')->get();
+        $products = Product::withCount(['solds' => function ($sold) {
+            $sold->select(DB::raw('SUM(qty) as solds'));
+        }])->orderBy('created_at', 'DESC')->get();
 
         return view('products.index', compact('products'));
     }
@@ -33,9 +44,10 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = ProductCategory::all();
+        $brands = Brand::all();
+        $categories = ProductSubcategory::all();
 
-        return view('products.create', compact('categories'));
+        return view('products.create', compact('categories', 'brands'));
     }
 
     /**
@@ -53,15 +65,10 @@ class ProductController extends Controller
             'stock' => 'required|numeric',
             'stock_defective' => "required|numeric",
             'price' => 'required|numeric',
-            'product_category_id' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'product_subcategory_id' => 'required',
         ], [], ['stock_defective' => 'defective stock']);
 
-        $imageName = time() . '.' . $request->image->extension();
-
-        $request->image->move(public_path('/storage/images/'), $imageName);
         $data = $request->all();
-        $data['image'] = $imageName;
         $product->create($data);
 
         return redirect('/products')
@@ -80,6 +87,8 @@ class ProductController extends Controller
 
         $receiveds = $product->receiveds()->latest()->limit(25)->get();
 
+        // dd($product);
+
         return view('products.show', compact('product', 'solds', 'receiveds'));
     }
 
@@ -91,9 +100,11 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        $categories = ProductCategory::all();
+        $brands = Brand::all();
+        $categories = ProductSubcategory::all();
+        $attributes = ProductSpecificationAttribute::whereNotIn('id', $product->attributes->pluck('attribute_id'))->get();
 
-        return view('products.edit', compact('product', 'categories'));
+        return view('products.edit', compact('product', 'categories', 'brands', 'attributes'));
     }
 
     /**
@@ -111,17 +122,10 @@ class ProductController extends Controller
             'stock' => 'required|numeric|min:0',
             'stock_defective' => "required|numeric|min:0",
             'price' => 'required|numeric|min:0',
-            'product_category_id' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'product_subcategory_id' => 'required',
+            'image_id' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ], [], ['stock_defective' => 'defective stock']);
         $data = $request->all();
-        if ($request->image) {
-            File::delete(public_path('/storage/images/' . $product->image));
-            $imageName = time() . '.' . $request->image->extension();
-
-            $request->image->move(public_path('/storage/images/'), $imageName);
-            $data['image'] = $imageName;
-        }
 
         $product->update($data);
 
@@ -146,5 +150,47 @@ class ProductController extends Controller
         return redirect()
             ->route('products.index')
             ->withStatus(__('Product removed successfully.'));
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function selectImage(Request $request, Product $product)
+    {
+        $product->update(['image_id' => $request->input('image_id')]);
+
+        return back();
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function addSpecificationAttribute(Request $request, Product $product)
+    {
+        $product->attributes()->create([
+            'attribute_id' => $request->input('attribute_id'),
+            'value' => $request->input('value'),
+        ]);
+
+        return back();
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function removeSpecificationAttribute(ProductSpecificationAttributeValue $attribute)
+    {
+        $attribute->delete();
+
+        return back();
     }
 }

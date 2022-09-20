@@ -9,7 +9,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form method="post" action="" autocomplete="off">
+                    <form enctype="multipart/form-data" method="post" action="" autocomplete="off">
                         @method('patch')
                         @csrf
                         <div class="row align-items-center mb-4">
@@ -31,6 +31,14 @@
                                 @include('alerts.feedback',['field'=>'name'])
                             </div>
 
+                            <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
+                                <label class="form-control-label" for="image">{{ __('Add Image')}}</label>
+                                <input type="file" name="image" id="image"
+                                    class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}"
+                                    accept="image/png, image/jpeg, image/jpg">
+                                @include('alerts.feedback', ['field' => 'images'])
+                            </div>
+
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary">{{ __('Submit')}}</button>
                             </div>
@@ -45,7 +53,8 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <form method="post" action="{{route('categories.store')}}" autocomplete="off">
+                    <form method="post" enctype="multipart/form-data" action="{{route('categories.store')}}"
+                        autocomplete="off">
                         @csrf
                         <div class="row align-items-center mb-4">
                             <div class="col-8">
@@ -64,6 +73,13 @@
                                     class="form-control align-center {{ $errors->has('name') ? ' is-invalid' : '' }}"
                                     placeholder="{{__('Name')}}" value="{{ old('name') }}" required autofocus />
                                 @include('alerts.feedback',['field'=>'name'])
+                            </div>
+                            <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
+                                <label class="form-control-label" for="image">{{ __('Add Image')}}</label>
+                                <input type="file" name="image" id="image"
+                                    class="form-control {{ $errors->has('image') ? ' is-invalid' : '' }}"
+                                    accept="image/png, image/jpeg, image/jpg">
+                                @include('alerts.feedback', ['field' => 'images'])
                             </div>
 
                             <div class="text-center">
@@ -105,7 +121,7 @@
                     <tr>
                         <td>{{ ++$key }}</td>
                         <td>{{ $category->name }}</td>
-                        <td>{{ $category->products->count() }}</td>
+                        <td>{{ $category->subProducts->count() }}</td>
                         <td>{{ $category->updated_at }}</td>
                         <td>
                             <div class="btn-group dropleft">
@@ -118,11 +134,9 @@
                                         href="{{ route('categories.show', $category, app()->getLocale()) }}">
                                         {{ __('Show')}}
                                     </a>
-                                    {{-- <a
-                                    class="dropdown-item text-darker border-0" aria-pressed="true"
-                                    href="{{ route('categories.edit', $category) }}"
-                                    >
-                                    {{ __('Edit')}}
+                                    {{-- <a class="dropdown-item text-darker border-0" aria-pressed="true"
+                                        href="{{ route('categories.edit', $category) }}">
+                                        {{ __('Edit')}}
                                     </a> --}}
                                     <button class="dropdown-item text-darker" type="button" data-toggle="modal"
                                         data-target="#editModal"

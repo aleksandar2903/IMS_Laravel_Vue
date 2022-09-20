@@ -97,7 +97,7 @@ class SaleController extends Controller
                 $transaction = new Transaction([
                     'user_id' => $sale->user_id,
                     'client_id' => $sale->client_id,
-                    'title' => __('Sale')." ID: '$sale->id'",
+                    'title' => __('Sale') . " ID: '$sale->id'",
                     'type' => "expense",
                     'payment_method_id' => $paymentMethod->payment_method_id,
                     'amount' => $sale->transactions->sum('amount') - $sale->products->sum('total_amount'),
@@ -111,7 +111,7 @@ class SaleController extends Controller
         foreach ($sale->products as $sold_product) {
             $product_name = $sold_product->product->name;
             $product_stock = $sold_product->product->stock;
-            if ($sold_product->qty > $product_stock) return back()->withError(__("The product ':name' does not have enough stock. Only has :stock units.",['name'=>$product_name, 'stock'=>$product_stock]));
+            if ($sold_product->qty > $product_stock) return back()->withError(__("The product ':name' does not have enough stock. Only has :stock units.", ['name' => $product_name, 'stock' => $product_stock]));
         }
         $users = User::all();
         foreach ($sale->products as $sold_product) {
@@ -120,11 +120,11 @@ class SaleController extends Controller
             if ($sold_product->product->stock < 10) {
                 foreach ($users as $user) {
                     foreach ($user->unreadNotifications as $notification) {
-                        if ($notification->data['product_id'] == $sold_product->product->id) {
+                        if (isset($notification->data['product']['id']) && $notification->data['product']['id'] == $sold_product->product->id) {
                             $notification->markAsRead();
                         }
                     }
-                    $user->notify(new StockAlert($sold_product->product));
+                    $user->notify(new StockAlert($sold_product->product->load('image')));
                 }
             }
         }
@@ -153,7 +153,7 @@ class SaleController extends Controller
                 ->withError(__('Product is already registered.'));
         }
         if ($request->get('qty') > $product->stock) {
-            return back()->withError(__("The product ':name' does not have enough stock. Only has :stock units.",['name'=>$product->name, 'stock'=>$product->stock]));
+            return back()->withError(__("The product ':name' does not have enough stock. Only has :stock units.", ['name' => $product->name, 'stock' => $product->stock]));
         }
         $request->merge(['total_amount' => $request->get('price') * $request->get('qty')]);
 
@@ -197,7 +197,7 @@ class SaleController extends Controller
     public function storetransaction(Request $request, Sale $sale, Transaction $transaction)
     {
         if ($sale->finalized_at == null && $sale->products()->count() > 0) {
-            $request->merge(['title' => __('Income').' | '.__('Sale').' ID: '.$sale->id]);
+            $request->merge(['title' => __('Income') . ' | ' . __('Sale') . ' ID: ' . $sale->id]);
             $request->merge(['type' => 'income']);
 
             $transaction->create($request->all());
@@ -252,5 +252,11 @@ class SaleController extends Controller
         $unreadNotification = Auth::user()->unreadNotifications;
 
         return $unreadNotification;
+    }
+
+    public function changeDeliveryStatus(Request $request, Sale $sale)
+    {
+        $sale->delivery_status = $request->delivery_status;
+        $sale->save();
     }
 }
