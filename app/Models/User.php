@@ -56,4 +56,14 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\Review', 'user_id');
     }
+
+    public function client()
+    {
+        return $this->hasOne('App\Models\Client', 'document_id');
+    }
+
+    public function client_orders()
+    {
+        return $this->hasManyThrough('App\Models\Sale', 'App\Models\Client', 'email', 'client_id', 'email');
+    }
 }

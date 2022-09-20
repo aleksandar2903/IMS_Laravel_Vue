@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 
@@ -18,7 +19,15 @@ use Illuminate\Support\Facades\URL;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        $user = Auth::user()->load('client')->load(['client_orders' => function ($q) {
+            $q->take(5);
+        }])->loadCount(['client_orders as delivered_orders_count' => function ($q) {
+            $q->where('delivery_status', 'Delivered');
+        }])->loadCount(['client_orders as pending_orders_count' => function ($q) {
+            $q->where('delivery_status', 'Pending');
+        }]);
+
+        return $user;
     });
 
     Route::get('/users', function (Request $request) {
@@ -53,6 +62,7 @@ Route::get('/tokens/create', function (Request $request) {
     return ['token' => $token->plainTextToken];
 });
 Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])->name('api.auth.login');
+Route::post('/register', [App\Http\Controllers\Api\AuthController::class, 'register'])->name('api.auth.register');
 
 Route::get('/search', [App\Http\Controllers\Api\ProductController::class, 'search'])->name('api.products.search');
 Route::get('/products/bulk', [App\Http\Controllers\Api\ProductController::class, 'bulk'])->name('api.products.bulk');

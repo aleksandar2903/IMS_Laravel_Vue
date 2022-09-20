@@ -25,7 +25,12 @@ class SaleController extends Controller
      */
     public function index()
     {
-        return Sale::latest()->get();
+        $client = Auth::user()->client;
+        return Sale::where('client_id', $client->id)->with('shipping_address')->with(['products' => function ($q) {
+            $q->with(['product' => function ($query) {
+                $query->with('image');
+            }]);
+        }])->latest()->get();
     }
 
     /**
@@ -50,7 +55,7 @@ class SaleController extends Controller
         $client = Client::firstOrCreate([
             'name' => $user->name,
             'email' => $user->email,
-            'document_id' => $user->id,
+            'document_id' => Carbon::now()->timestamp,
             'document_type' => 'v'
         ]);
 
@@ -92,6 +97,8 @@ class SaleController extends Controller
             "phone" => $request->shipping_address['phone'],
             "email" => $request->shipping_address['email']
         ]);
+
+        $user->carts()->delete();
 
         return ['success' => __('Sale successfully registered.')];
     }
