@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Sale;
+use App\Models\Cart;
 use App\Models\Product;
 use Carbon\Carbon;
 use App\Models\SoldProduct;
@@ -59,35 +60,27 @@ class SaleController extends Controller
             'document_type' => 'v'
         ]);
 
-        $client->total_paid += $request->total_amount;
-        $client->total_purchases += $request->total_amount;
-        $client->last_purchase = Carbon::now();
+        $cart = Cart::where('user_id', Auth::id())->with('product')->get();
 
         $client->save();
 
         $sale = Sale::create([
             'client_id' => $client->id,
-            'status' => 'Paid',
-            'paid' => $request->total_amount,
+            'status' => 'Unpaid',
+            'paid' => 0,
             'due' => 0,
         ]);
 
-        foreach ($request->products as $key => $product) {
+        error_log($cart);
+
+        foreach ($cart as $key => $cart) {
             $sale->products()->create([
-                'product_id' => $product['product_id'],
-                'price' => $product['price'],
-                'qty' => $product['quantity'],
-                'total_amount' => $product['total_amount'],
+                'product_id' => $cart->product['id'],
+                'price' => $cart->product['price'],
+                'qty' => $cart['quantity'],
+                'total_amount' => $cart['quantity'] * $cart->product['price'],
             ]);
         }
-
-        $sale->transactions()->create([
-            'title' => __('Income') . ' | ' . __('Sale') . ' ID: ' . $sale->id,
-            'type' => 'income',
-            'amount' => $request->total_amount,
-            'client_id' => $client->id,
-            'payment_method_id' => $request->payment_method_id
-        ]);
 
         $sale->shipping_address()->create([
             "name" => $request->shipping_address['name'],

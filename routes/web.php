@@ -75,4 +75,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('purchases/{purchase}/transaction', ['as' => 'purchase.transaction.store', 'uses' => '\App\Http\Controllers\ReceiptController@storetransaction']);
     Route::post('purchases/{purchase}/transaction', ['as' => 'purchase.transaction.store', 'uses' => '\App\Http\Controllers\ReceiptController@storetransaction']);
     Route::delete('purchases/{purchase}/transaction/{transaction}', ['as' => 'purchase.transaction.destroy', 'uses' => '\App\Http\Controllers\ReceiptController@destroytransaction']);
+
+    // stripe checkout
+
+    Route::get('/checkout', [App\Http\Controllers\StripeController::class, 'checkout']);
+    Route::get('/success', [App\Http\Controllers\StripeController::class, 'success'])->name('checkout.success');
+    Route::get('/cancel', [App\Http\Controllers\StripeController::class, 'cancel'])->name('checkout.cancel');
 });

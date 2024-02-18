@@ -47,7 +47,7 @@
                             <td>{{ $sale->products->sum('total_amount') }}</td>
                             <td>{{ format_money($sale->paid ) }}</td>
                             <td>{{ format_money($sale->due) }}</td>
-                            <td>{{ $sale->status }}</td>
+                            <td>{{ __($sale->status) }}</td>
                             <td>
                                 @if (!$sale->finalized_at)
                                 <span class="text-danger">{{__('To Finalize')}}</span>

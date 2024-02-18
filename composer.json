@@ -14,7 +14,8 @@
         "laravel/sanctum": "^2.15",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.2",
-        "protonemedia/laravel-cross-eloquent-search": "^2.0"
+        "protonemedia/laravel-cross-eloquent-search": "^2.0",
+        "stripe/stripe-php": "^13.9"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
