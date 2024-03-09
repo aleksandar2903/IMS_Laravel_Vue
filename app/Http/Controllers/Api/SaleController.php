@@ -27,6 +27,7 @@ class SaleController extends Controller
     public function index()
     {
         $client = Auth::user()->client;
+
         return Sale::where('client_id', $client->id)->with('shipping_address')->with(['products' => function ($q) {
             $q->with(['product' => function ($query) {
                 $query->with('image');
@@ -56,7 +57,7 @@ class SaleController extends Controller
         $client = Client::firstOrCreate([
             'name' => $user->name,
             'email' => $user->email,
-            'document_id' => Carbon::now()->timestamp,
+            'document_id' => $user->id,
             'document_type' => 'v'
         ]);
 
@@ -70,8 +71,6 @@ class SaleController extends Controller
             'paid' => 0,
             'due' => 0,
         ]);
-
-        error_log($cart);
 
         foreach ($cart as $key => $cart) {
             $sale->products()->create([
@@ -93,7 +92,45 @@ class SaleController extends Controller
 
         $user->carts()->delete();
 
-        return ['success' => __('Sale successfully registered.')];
+        \Stripe\Stripe::setApiKey(env("STRIPE_SECRET_KEY"));
+
+        $newSale = Sale::where('id', $sale->id)->with(['products' => function ($q) {
+            return $q->with('product');
+        }])->first();
+
+        if ($sale == null) {
+            return;
+        }
+
+        $lineItems = [];
+        $totalPrice = 0;
+
+        foreach ($newSale->products as $product) {
+            $totalPrice += $product->product->price;
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'rsd',
+                    'product_data' => [
+                        'name' => $product->product->name,
+                        'images' => ['https://gmedia.playstation.com/is/image/SIEPDC/ps5-product-thumbnail-01-en-14sep21?$facebook$']
+                    ],
+                    'unit_amount' => $product->price * 100,
+                ],
+                'quantity' => $product->qty,
+            ];
+        }
+
+        $checkout_session = \Stripe\Checkout\Session::create([
+          'line_items' => $lineItems,
+          'mode' => 'payment',
+          'success_url' => route('checkout.success', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
+          'cancel_url' => route('checkout.cancel', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
+        ]);
+
+        $newSale->stripe_session_id = $checkout_session->id;
+        $newSale->save();
+
+        return json_encode($checkout_session->url);
     }
 
     /**

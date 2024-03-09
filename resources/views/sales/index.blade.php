@@ -32,6 +32,7 @@
                         <th>{{ __('Paid')}}</th>
                         <th>{{ __('Due')}}</th>
                         <th>{{__('Payment Status')}}</th>
+                        <th>{{__('Delivery Status')}}</th>
                         <th>Status</th>
                         <th></th>
                     </thead>
@@ -44,10 +45,11 @@
                             <td>{{ ($sale->user ? $sale->user->name : '-') }}</td>
                             <td>{{ $sale->products->count() }}</td>
                             <td>{{ $sale->products->sum('qty') }}</td>
-                            <td>{{ $sale->products->sum('total_amount') }}</td>
+                            <td>{{ format_money($sale->products->sum('total_amount')) }}</td>
                             <td>{{ format_money($sale->paid ) }}</td>
                             <td>{{ format_money($sale->due) }}</td>
                             <td>{{ __($sale->status) }}</td>
+                            <td>{{ __($sale->delivery_status) }}</td>
                             <td>
                                 @if (!$sale->finalized_at)
                                 <span class="text-danger">{{__('To Finalize')}}</span>

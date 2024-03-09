@@ -11,23 +11,54 @@
                     <div class="col-8">
                         <h4 class="card-title">{{__('Sale Summary')}}</h4>
                     </div>
-                    @if (!$sale->finalized_at)
                     <div class="col-4 text-right">
-                        @if ($sale->products->count() == 0)
-                        <form action="{{ route('sales.destroy', $sale) }}" method="post" class="d-inline">
-                            @csrf
-                            @method('delete')
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                {{__('Delete Sale')}}
-                            </button>
-                        </form>
+                        @if (!$sale->finalized_at)
+                            @if ($sale->products->count() == 0)
+                            <form action="{{ route('sales.destroy', $sale) }}" method="post" class="d-inline">
+                                @csrf
+                                @method('delete')
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    {{__('Delete Sale')}}
+                                </button>
+                            </form>
+                            @else
+                            <a class="btn btn-sm btn-primary" href="{{route('sales.finalize', $sale)}}">
+                                {{__('Finalize Sale')}}
+                            </a>
+                            @endif
                         @else
-                        <a class="btn btn-sm btn-primary" href="{{route('sales.finalize', $sale)}}">
-                            {{__('Finalize Sale')}}
-                        </a>
+                            @if($sale->delivery_status == 'Pending')
+                                <form action="{{ route('sales.change.delivery.status', $sale) }}" method="post" class="d-inline">
+                                    @csrf
+                                    @method('post')
+                                    <input type="hidden" name="delivery_status" value="Ready for Delivery">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        {{__('Ready for Delivery')}}
+                                    </button>
+                                </form>
+                            @endif
+                            @if($sale->delivery_status == 'Ready for Delivery')
+                                <form action="{{ route('sales.change.delivery.status', $sale) }}" method="post" class="d-inline">
+                                    @csrf
+                                    @method('post')
+                                    <input type="hidden" name="delivery_status" value="On Delivery">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        {{__('On Delivery')}}
+                                    </button>
+                                </form>
+                            @endif
+                            @if($sale->delivery_status == 'On Delivery')
+                                <form action="{{ route('sales.change.delivery.status', $sale) }}" method="post" class="d-inline">
+                                    @csrf
+                                    @method('post')
+                                    <input type="hidden" name="delivery_status" value="Delivered">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        {{__('Delivered')}}
+                                    </button>
+                                </form>
+                            @endif
                         @endif
                     </div>
-                    @endif
                 </div>
             </div>
             <div

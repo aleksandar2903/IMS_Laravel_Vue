@@ -48,6 +48,7 @@ class StripeController extends Controller
           'mode' => 'payment',
           'success_url' => route('checkout.success', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
           'cancel_url' => route('checkout.cancel', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
+          'expires_at'=> Carbon::now()->addMinute(30)->timestamp
         ]);
 
         $sale->stripe_session_id = $checkout_session->id;
@@ -74,13 +75,12 @@ class StripeController extends Controller
 
         try {
             $session = \Stripe\Checkout\Session::retrieve($sessionId);
+
             if (!$session) {
                 throw new NotFoundHttpException;
             }
 
-            $client = Client::where('email', Auth::user()->email)->first();
-
-            $sale = Sale::where('stripe_session_id', $sessionId)->with('products')->first();
+            $sale = Sale::where('stripe_session_id', $sessionId)->with(['products', 'client'])->first();
 
             if ($sale == null) {
                 return;
@@ -96,89 +96,85 @@ class StripeController extends Controller
                 'title' => __('Income') . ' | ' . __('Sale') . ' ID: ' . $sale->id,
                 'type' => 'income',
                 'amount' => $total_amount,
-                'client_id' => $client->id,
+                'client_id' => $sale->client->id,
                 'payment_method_id' => 2
             ]);
 
-            $client->total_paid += $request->total_amount;
-            $client->total_purchases += $request->total_amount;
-            $client->last_purchase = Carbon::now();
+            $sale->paid = $total_amount;
+            $sale->status = 'Paid';
+            $sale->client->total_paid += $total_amount;
+            $sale->client->total_purchases += $total_amount;
+            $sale->client->last_purchase = Carbon::now();
 
-            $user = Auth::user();
-
-            $stripe_sessions = $request->session()->get((string) $user->id);
-
-            $new_stripe_sessions = [];
-
-            foreach ($stripe_sessions as $session) {
-               if ($session != $sessionId) {
-                array_push($new_stripe_sessions, $session);
-               }
-            }
-
-            $request->session()->put((string) $user->id, $new_stripe_sessions);
+            $sale->client->save();
+            $sale->save();
 
             return view('checkout.success');
         } catch (\Exception $e) {
-            throw new NotFoundHttpException();
+            error_log($e);
         }
-
     }
 
     public function cancel(Request $request)
     {
-        $user = Auth::user();
-
-        $stripe_sessions = $request->session()->get((string) $user->id);
-
-        $new_stripe_sessions = [];
-
-        foreach ($stripe_sessions as $session) {
-           if ($session != $request->get('session_id')) {
-            array_push($new_stripe_sessions, $session);
-           }
-        }
-
-        $request->session()->put((string) $user->id, $new_stripe_sessions);
-
         return view('checkout.cancel');
     }
 
     public function webhook()
     {
-        // This is your Stripe CLI webhook secret for testing your endpoint locally.
-        $endpoint_secret = env('STRIPE_WEBHOOK_KEY');
+// //         // This is your Stripe CLI webhook secret for testing your endpoint locally.
+//         $endpoint_secret = env('STRIPE_WEBHOOK_SECRET');
 
-        $payload = @file_get_contents('php://input');
-        $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
-        $event = null;
+//         $payload = @file_get_contents('php://input');
+//         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+//         $event = null;
 
+//         try {
+//             $event = \Stripe\Webhook::constructEvent(
+//                 $payload, $sig_header, $endpoint_secret
+//             );
+//         } catch (\UnexpectedValueException $e) {
+//             // Invalid payload
+//             return response('', 400);
+//         } catch (\Stripe\Exception\SignatureVerificationException $e) {
+//             // Invalid signature
+//             return response('', 400);
+//         }
 
-        try {
-            $event = \Stripe\Webhook::constructEvent(
-                $payload, $sig_header, $endpoint_secret
-            );
-        } catch (\UnexpectedValueException $e) {
-            // Invalid payload
-        } catch (\Stripe\Exception\SignatureVerificationException $e) {
-            // Invalid signature
-        }
+// // Handle the event
+//         switch ($event->type) {
+//             case 'checkout.session.completed':
+//                 $session = $event->data->object;
 
-        error_log($event);
+//                 $sale = Sale::where('stripe_session_id', $sessionId)->with('products')->first();
 
+//                 if ($sale == null) {
+//                     return;
+//                 }
 
-// Handle the event
-        switch ($event->type) {
-            case 'checkout.session.completed':
-                $session = $event->data->object;
+//                 $total_amount = 0;
 
-            // ... handle other event types
-            default:
-                return response('Received unknown event type ' . $event->type, 400);
-        }
+//                 foreach ($sale->products as $product) {
+//                     $total_amount += $product->total_amount;
+//                 }
 
-        error_log($event);
+//                 $sale->transactions()->create([
+//                     'title' => __('Income') . ' | ' . __('Sale') . ' ID: ' . $sale->id,
+//                     'type' => 'income',
+//                     'amount' => $total_amount,
+//                     'client_id' => $client->id,
+//                     'payment_method_id' => 2
+//                 ]);
 
-        return response($event);
+//                 $client->total_paid += $request->total_amount;
+//                 $client->total_purchases += $request->total_amount;
+//                 $client->last_purchase = Carbon::now();
+
+//             // ... handle other event types
+//             default:
+//                 echo 'Received unknown event type ' . $event->type;
+//         }
+
+//         return response('');
     }
 }

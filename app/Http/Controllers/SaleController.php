@@ -258,5 +258,7 @@ class SaleController extends Controller
     {
         $sale->delivery_status = $request->delivery_status;
         $sale->save();
+
+        return back()->withStatus(__('Delivery status has been changed successfully.'));
     }
 }

@@ -63,6 +63,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::patch('sales/{sale}/product/{soldproduct}', ['as' => 'sales.product.update', 'uses' => '\App\Http\Controllers\SaleController@updateproduct']);
     Route::delete('sales/{sale}/product/{soldproduct}', ['as' => 'sales.product.destroy', 'uses' => '\App\Http\Controllers\SaleController@destroyproduct']);
     Route::get('unreadNotifications', ['as' => 'notifications', 'uses' => '\App\Http\Controllers\SaleController@unreadNotifications']);
+    Route::post('sales/{sale}/changeDeliveryStatus', ['as' => 'sales.change.delivery.status', 'uses' => '\App\Http\Controllers\SaleController@changeDeliveryStatus']);
 
 
     Route::resource('purchases', '\App\Http\Controllers\ReceiptController')->except(['edit', 'update']);
@@ -75,10 +76,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('purchases/{purchase}/transaction', ['as' => 'purchase.transaction.store', 'uses' => '\App\Http\Controllers\ReceiptController@storetransaction']);
     Route::post('purchases/{purchase}/transaction', ['as' => 'purchase.transaction.store', 'uses' => '\App\Http\Controllers\ReceiptController@storetransaction']);
     Route::delete('purchases/{purchase}/transaction/{transaction}', ['as' => 'purchase.transaction.destroy', 'uses' => '\App\Http\Controllers\ReceiptController@destroytransaction']);
-
-    // stripe checkout
-
     Route::get('/checkout', [App\Http\Controllers\StripeController::class, 'checkout']);
-    Route::get('/success', [App\Http\Controllers\StripeController::class, 'success'])->name('checkout.success');
-    Route::get('/cancel', [App\Http\Controllers\StripeController::class, 'cancel'])->name('checkout.cancel');
 });
+
+
+// stripe checkout
+
+Route::post('/webhook', [App\Http\Controllers\StripeController::class, 'webhook']);
+Route::get('/success', [App\Http\Controllers\StripeController::class, 'success'])->name('checkout.success');
+Route::get('/cancel', [App\Http\Controllers\StripeController::class, 'cancel'])->name('checkout.cancel');
