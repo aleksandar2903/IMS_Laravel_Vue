@@ -90,7 +90,7 @@ class Product extends Model
 
     public function reviews()
     {
-        return $this->hasMany('App\Models\Review')->orderBy('created_at', 'desc')->take(5);
+        return $this->hasMany('App\Models\Review', 'product_id')->orderBy('created_at', 'desc')->take(5);
     }
 
     public function publishedReviews()

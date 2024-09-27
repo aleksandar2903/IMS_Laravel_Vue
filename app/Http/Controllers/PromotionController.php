@@ -93,11 +93,11 @@ class PromotionController extends Controller
     {
         $request->validate([
             'title' => 'required|min:3',
-            'description' => 'required|min:3',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg'
         ]);
 
         $data = $request->all();
+
         if ($request->image) {
             File::delete(public_path('/storage/images/' . $promotion->image));
             $img = Image::make($request->image->path());

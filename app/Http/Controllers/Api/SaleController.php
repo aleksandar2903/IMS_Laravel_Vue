@@ -120,17 +120,21 @@ class SaleController extends Controller
             ];
         }
 
-        $checkout_session = \Stripe\Checkout\Session::create([
-          'line_items' => $lineItems,
-          'mode' => 'payment',
-          'success_url' => route('checkout.success', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
-          'cancel_url' => route('checkout.cancel', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
-        ]);
+        if ($request->payment_method_id !== 2) {
+            $checkout_session = \Stripe\Checkout\Session::create([
+                'line_items' => $lineItems,
+                'mode' => 'payment',
+                'success_url' => route('checkout.success', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
+                'cancel_url' => route('checkout.cancel', [], true) . "?session_id={CHECKOUT_SESSION_ID}",
+              ]);
 
-        $newSale->stripe_session_id = $checkout_session->id;
-        $newSale->save();
+              $newSale->stripe_session_id = $checkout_session->id;
+              $newSale->save();
 
-        return json_encode($checkout_session->url);
+              return json_encode($checkout_session->url);
+        }
+
+        return json_encode('success');
     }
 
     /**

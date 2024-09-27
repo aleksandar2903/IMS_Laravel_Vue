@@ -23,12 +23,21 @@
                             </div>
                         </div>
                         <div class="pl-4 pr-4">
-                            <div class="form-group{{ $errors->has('name') ? ' has-danger' : '' }}">
-                                <label class="form-control-label" for="input-name">{{__('Name')}}</label>
-                                <input type="text" name="name" id="input-name"
-                                    class="form-control align-center {{ $errors->has('name') ? ' is-invalid' : '' }}"
-                                    placeholder="{{__('Name')}}" value="{{ old('name') }}" required autofocus />
-                                @include('alerts.feedback',['field'=>'name'])
+                            <div class="form-group{{ $errors->has('title') ? ' has-danger' : '' }}">
+                                <label class="form-control-label" for="input-title">{{__('Title')}}</label>
+                                <input type="text" name="name" id="input-title"
+                                    class="form-control align-center {{ $errors->has('title') ? ' is-invalid' : '' }}"
+                                    placeholder="{{__('Title')}}" value="{{ old('title') }}" required autofocus />
+                                @include('alerts.feedback',['field'=>'title'])
+                            </div>
+
+                            <div class="form-group{{ $errors->has('description') ? ' has-danger' : '' }}">
+                                <label class="form-control-label" for="input-description">{{__('Description')}}</label>
+                                <input type="text" name="description" id="input-description"
+                                    class="form-control align-center {{ $errors->has('description') ? ' is-invalid' : '' }}"
+                                    placeholder="{{__('Description')}}" value="{{ old('description') }}" required
+                                    autofocus />
+                                @include('alerts.feedback',['field'=>'description'])
                             </div>
 
                             <div class="form-group{{ $errors->has('image') ? ' has-danger' : '' }}">
@@ -147,7 +156,7 @@
                                     <button class="dropdown-item text-darker" type="button" data-toggle="modal"
                                         data-target="#editModal"
                                         data-action="{{ route('promotions.update',$promotion) }}"
-                                        data-name="{!!$promotion->title!!}">
+                                        data-title="{!!$promotion->title!!}" data-description="{!!$promotion->description!!}">
                                         {{ __('Edit')}}
                                     </button>
                                     <button class="dropdown-item text-danger" type="button" data-toggle="modal"
@@ -172,10 +181,12 @@
 $('#editModal').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget);
                 var action = button.data('action');
-                var name = button.data('name');
+                var name = button.data('title');
+                var description = button.data('description');
                 var modal = $(this);
                 modal.find('form').attr('action', action);
-                modal.find('#input-name').val(name)
+                modal.find('#input-title').val(name)
+                modal.find('#input-description').val(description)
     });
 });
 </script>

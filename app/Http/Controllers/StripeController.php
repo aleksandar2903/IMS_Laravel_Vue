@@ -31,7 +31,7 @@ class StripeController extends Controller
                     'currency' => 'rsd',
                     'product_data' => [
                         'name' => $product->product->name,
-                        'images' => ['https://gmedia.playstation.com/is/image/SIEPDC/ps5-product-thumbnail-01-en-14sep21?$facebook$']
+                        'images' => ['https://www.computerland.rs/login/media/images/products/xbox-series-s-512gb-fortnite-and-rocket-league-holiday-bundle.jpg']
                     ],
                     'unit_amount' => $product->price * 100,
                 ],

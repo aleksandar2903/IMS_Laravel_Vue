@@ -14,9 +14,9 @@ class ReviewController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Review::with('product')->orderBy("created_at", "desc")->take(15)->get();
+        return Review::where('product_id', $request->product_id)->with('product')->orderBy("created_at", "desc")->take(15)->get();
     }
 
     /**
@@ -48,7 +48,7 @@ class ReviewController extends Controller
             'product_id' => $request->product_id,
             'rating' => $request->rating,
             'text' => $request->text,
-            'title' => $request->title,
+            'title' => $request->title
         ]);
 
         return response()->json(['message' => 'Review created successfully']);
